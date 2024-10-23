@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://wadl.dev.java.net/2009/02"
+           xmlns="http://wadl.dev.java.net/2009/02"
+           elementFormDefault="qualified">
+  
+  <xs:element name="application" type="application"/>
+
+  <xs:complexType name="application">
+    <xs:sequence>
+      <xs:element name="grammars" type="grammars" minOccurs="0"/>
+      <xs:element name="resources" type="resources" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="resource_type" type="resource_type" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="method" type="method" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="representation" type="representation" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="base" type="xs:anyURI"/>
+  </xs:complexType>
+
+  <xs:complexType name="resources">
+    <xs:sequence>
+      <xs:element name="resource" type="resource" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="base" type="xs:anyURI" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="resource">
+    <xs:sequence>
+      <xs:element name="param" type="param" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="method" type="method" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="resource" type="resource" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="representation" type="representation" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:ID"/>
+    <xs:attribute name="path" type="xs:string" use="required"/>
+    <xs:attribute name="type" type="xs:QName" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="method">
+    <xs:sequence>
+      <xs:element name="request" type="request" minOccurs="0"/>
+      <xs:element name="response" type="response" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:ID"/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="request">
+    <xs:sequence>
+      <xs:element name="param" type="param" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="representation" type="representation" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="response">
+    <xs:sequence>
+      <xs:element name="representation" type="representation" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="status" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="representation">
+    <xs:sequence>
+      <xs:element name="param" type="param" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:ID"/>
+    <xs:attribute name="mediaType" type="xs:string"/>
+    <xs:attribute name="element" type="xs:QName"/>
+  </xs:complexType>
+
+  <xs:complexType name="resource_type">
+    <xs:sequence>
+      <xs:element name="param" type="param" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="method" type="method" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="resource" type="resource" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="representation" type="representation" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:ID"/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="grammars">
+    <xs:sequence>
+      <xs:element name="include" type="include" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="include">
+    <xs:attribute name="href" type="xs:anyURI" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="param">
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="style" type="xs:string" use="required"/>
+    <xs:attribute name="type" type="xs:QName"/>
+    <xs:attribute name="required" type="xs:boolean" default="false"/>
+    <xs:attribute name="repeating" type="xs:boolean" default="false"/>
+    <xs:attribute name="fixed" type="xs:string"/>
+    <xs:attribute name="default" type="xs:string"/>
+  </xs:complexType>
+  
+</xs:schema>
