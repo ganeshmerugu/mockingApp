@@ -1,49 +1,48 @@
 package com.castlemock.application.Service;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Unmarshaller;
-import net.java.dev.wadl._2009._02.Application;
-import net.java.dev.wadl._2009._02.Resources;
-import net.java.dev.wadl._2009._02.Resource;
-import net.java.dev.wadl._2009._02.Method;
-import org.springframework.stereotype.Service;
+import com.castlemock.application.Model.MockService;
+import com.castlemock.application.Model.WADLApplication;
+import com.castlemock.application.Model.WADLMethod;
+import com.castlemock.application.Model.WADLResource;
+import org.springframework.stereotype.Component;
 
-import java.io.File;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@Component
 public class WADLParserUtil {
 
-    public void parseWADL(String filePath) {
+    // Parse WADL file and return a list of MockService objects
+    public List<MockService> parseWADL(InputStream inputStream) {
+        List<MockService> mockServices = new ArrayList<>();
+
         try {
-            // Use JAXB to parse WADL
-            JAXBContext jaxbContext = JAXBContext.newInstance(Application.class);
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            Application wadl = (Application) unmarshaller.unmarshal(new File(filePath));
+            // Initialize JAXB Context for parsing WADL
+            JAXBContext context = JAXBContext.newInstance(WADLApplication.class);
+            Unmarshaller unmarshaller = context.createUnmarshaller();
 
-            // Handle List of Resources
-            List<Resources> resourcesList = wadl.getResources();  // Access the List of Resources
+            // Parse the WADL file
+            WADLApplication wadlApplication = (WADLApplication) unmarshaller.unmarshal(inputStream);
 
-            if (resourcesList != null && !resourcesList.isEmpty()) {
-                for (Resources resources : resourcesList) {
-                    for (Resource resource : resources.getResource()) {  // Access Resource objects
-                        System.out.println("Resource path: " + resource.getPath());
-
-                        // Fetch the methods associated with each resource
-                        for (Method method : resource.getMethod()) {  // Access the methods
-                            System.out.println("Method: " + method.getName());
-                        }
-                    }
+            // Iterate through all resources and methods to create mock services
+            for (WADLResource resource : wadlApplication.getResources().getResource()) {
+                for (WADLMethod method : resource.getMethod()) {
+                    MockService mockService = new MockService();
+                    mockService.setEndpoint(resource.getPath());
+                    mockService.setMethod(method.getName().toUpperCase());
+                    mockService.setResponseStrategy("RANDOM");  // Default strategy
+                    mockService.setMockResponseTemplate("{ \"message\": \"WADL mock response for " + method.getName() + " at " + resource.getPath() + "\" }");
+                    mockServices.add(mockService);
                 }
-            } else {
-                System.out.println("No resources found in the WADL file");
             }
-
-            System.out.println("WADL parsed successfully");
         } catch (JAXBException e) {
-            System.err.println("Error parsing WADL: " + e.getMessage());
-            e.printStackTrace();
+            throw new RuntimeException("Error parsing WADL file", e);
         }
+
+        return mockServices;
     }
 }

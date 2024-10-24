@@ -1,43 +1,55 @@
 package com.castlemock.application.Service;
 
 import com.castlemock.application.Model.MockService;
-import io.swagger.parser.SwaggerParser;
-import io.swagger.models.Swagger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import org.springframework.stereotype.Component;
 
-@Service
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Component
 public class SwaggerParserUtil {
 
-    private static final Logger logger = LogManager.getLogger(SwaggerParserUtil.class);
+    // Parse Swagger file and return a list of MockService objects
+    public List<MockService> parseSwagger(InputStream inputStream) throws IOException {
+        List<MockService> mockServices = new ArrayList<>();
 
-    @Autowired
-    private MockServiceManager mockServiceManager;
-
-    public void parseSwagger(String swaggerFilePath) {
-        logger.info("Starting to parse Swagger file: {}", swaggerFilePath);
-
-        Swagger swagger = new SwaggerParser().read(swaggerFilePath);
-
-        if (swagger == null) {
-            logger.error("Failed to parse Swagger file: {}", swaggerFilePath);
-            return;
+        // Convert InputStream to String (Swagger/OpenAPI content)
+        String swaggerContent;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            swaggerContent = reader.lines().collect(Collectors.joining("\n"));
         }
 
-        logger.debug("Swagger API title: {}", swagger.getInfo().getTitle());
+        // Parse the OpenAPI definition
+        OpenAPI openAPI = new OpenAPIV3Parser().readContents(swaggerContent, null, null).getOpenAPI();
 
-        // Example of creating a mock service from Swagger
-        MockService mockService = new MockService();
-        mockService.setEndpoint("/example-swagger");
-        mockService.setMethod("POST");
-        mockService.setResponse("{ \"message\": \"Swagger mock response\" }");
+        if (openAPI == null) {
+            throw new RuntimeException("Invalid Swagger file");
+        }
 
-        // Save the mock service
-        mockServiceManager.createMock(mockService);
-        logger.info("Mock service created from Swagger with endpoint: {}", mockService.getEndpoint());
+        // Iterate over all paths and operations
+        for (Map.Entry<String, PathItem> entry : openAPI.getPaths().entrySet()) {
+            String path = entry.getKey();
+            PathItem pathItem = entry.getValue();
 
-        logger.info("Swagger parsing completed successfully");
+            pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
+                MockService mockService = new MockService();
+                mockService.setEndpoint(path);
+                mockService.setMethod(httpMethod.toString());
+                mockService.setResponseStrategy("SEQUENCE");  // Default strategy
+                mockService.setMockResponseTemplate("{ \"message\": \"Swagger mock response for " + httpMethod + " at " + path + "\" }");
+                mockServices.add(mockService);
+            });
+        }
+
+        return mockServices;
     }
 }

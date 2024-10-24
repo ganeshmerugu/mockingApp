@@ -42,6 +42,13 @@
 
 
 	<dependencies>
+		<!-- https://mvnrepository.com/artifact/wsdl4j/wsdl4j -->
+		<dependency>
+			<groupId>wsdl4j</groupId>
+			<artifactId>wsdl4j</artifactId>
+			<version>1.6.2</version>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/io.swagger.parser.v3/swagger-parser -->
 		<dependency>
 			<groupId>io.swagger.parser.v3</groupId>
@@ -202,7 +209,25 @@
 						</configuration>					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>com.cvent</groupId>
+				<artifactId>raml-validator</artifactId>
+				<version>1.0.0</version>
+				<configuration>
+					<ramlFile>api.raml</ramlFile>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>validate-raml</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
+
 	</build>
+
 
 </project>
