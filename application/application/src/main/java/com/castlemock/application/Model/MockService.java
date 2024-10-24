@@ -1,23 +1,22 @@
 package com.castlemock.application.Model;
 
+
 import jakarta.persistence.*;
 
 @Entity
 public class MockService {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String endpoint;
-    private String originalEndpoint;
-    private String method; // e.g., GET, POST
-    private String response;
-
+    private String method;
+    private String responseStrategy;  // e.g., RANDOM, SEQUENCE, QUERY_MATCH
     @Lob
-    @Column(name = "soap_request_object")
-    private String soapRequestObject;  // Adjusted type
+    private String mockResponseTemplate;  // Large response template storage
 
-    // Getters and Setters
+    // Getters and setters...
     public Long getId() {
         return id;
     }
@@ -34,14 +33,6 @@ public class MockService {
         this.endpoint = endpoint;
     }
 
-    public String getOriginalEndpoint() {
-        return originalEndpoint;
-    }
-
-    public void setOriginalEndpoint(String originalEndpoint) {
-        this.originalEndpoint = originalEndpoint;
-    }
-
     public String getMethod() {
         return method;
     }
@@ -50,19 +41,19 @@ public class MockService {
         this.method = method;
     }
 
-    public String getResponse() {
-        return response;
+    public String getResponseStrategy() {
+        return responseStrategy;
     }
 
-    public void setResponse(String response) {
-        this.response = response;
+    public void setResponseStrategy(String responseStrategy) {
+        this.responseStrategy = responseStrategy;
     }
 
-    public void setSoapRequestObject(String soapRequestObject) {
-        this.soapRequestObject = soapRequestObject;  // Ensure that the assignment is to a String
+    public String getMockResponseTemplate() {
+        return mockResponseTemplate;
     }
 
-    public String getSoapRequestObject() {
-        return soapRequestObject;
+    public void setMockResponseTemplate(String mockResponseTemplate) {
+        this.mockResponseTemplate = mockResponseTemplate;
     }
 }
