@@ -4,15 +4,32 @@ package com.castlemock.application.Service.reponseGenerationStrategy;
 import com.castlemock.application.Model.MockService;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-
 @Component
 public class QueryMatchResponseStrategy implements ResponseGenerationStrategy {
 
     @Override
     public String generateResponse(MockService service, Map<String, String> params) {
-        // Logic to match query parameters and generate a response
-        // For simplicity, returning the response template as-is
+        // Extract the possible responses
+        List<String> responses = getPossibleResponses(service.getMockResponseTemplate());
+
+        // Logic to match query parameters to a specific response
+        if (params.containsKey("name")) {
+            String name = params.get("name");
+            for (String response : responses) {
+                if (response.contains("\"name\": \"" + name + "\"")) {
+                    return response;
+                }
+            }
+        }
+
+        // Return a default response if no match found
         return service.getMockResponseTemplate();
+    }
+
+    private List<String> getPossibleResponses(String responseTemplate) {
+        return Arrays.asList(responseTemplate.split(";"));
     }
 }

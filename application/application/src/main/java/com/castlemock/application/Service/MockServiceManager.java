@@ -1,63 +1,64 @@
 package com.castlemock.application.Service;
 
-import com.castlemock.application.Model.MockService;
-import com.castlemock.application.Model.ResponseGenerator;
-import com.castlemock.application.Repository.MockServiceRepository;
+import com.castlemock.application.Model.RestMockResponse;
+import com.castlemock.application.Model.mock.rest.RestDefinitionType;
+import com.castlemock.application.Repository.MockResponseRepository;
+import com.castlemock.application.Service.core.manager.FileManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class MockServiceManager {
 
-    @Autowired
-    private MockServiceRepository mockServiceRepository;
+    private static final Logger logger = LoggerFactory.getLogger(MockServiceManager.class);
+
+    private final FileManager fileManager;
+    private final MockResponseRepository mockResponseRepository;
 
     @Autowired
-    private RAMLParserUtil ramlParserUtil;
+    public MockServiceManager(FileManager fileManager, MockResponseRepository mockResponseRepository) {
+        this.fileManager = fileManager;
+        this.mockResponseRepository = mockResponseRepository;
 
-    @Autowired
-    private SwaggerParserUtil swaggerParserUtil;
+        logger.info("MockServiceManager initialized with FileManager and MockResponseRepository.");
+    }
 
-    @Autowired
-    private ResponseGenerator responseGenerator;
-
-    // Create a mock service from RAML file
-    public void createMockServiceFromRAML(MultipartFile file) {
+    public void processUploadedFile(MultipartFile file, RestDefinitionType type, String projectId) {
         try {
-            List<MockService> mockServices = ramlParserUtil.parseRAML(file.getInputStream());
-            for (MockService service : mockServices) {
-                mockServiceRepository.save(service);
-            }
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid RAML file", e);
+            logger.info("Processing uploaded file for projectId: {}, type: {}", projectId, type);
+            fileManager.uploadFile(file);
+            logger.info("File uploaded successfully for type: {}", type);
+            // Additional logic for processing the uploaded file and mock setup
+        } catch (Exception e) {
+            logger.error("Error processing uploaded file: {}", e.getMessage(), e);
         }
     }
 
-    // Create a mock service from Swagger file
-    public void createMockServiceFromSwagger(MultipartFile file) {
+    public void processFileFromURL(String fileUrl, RestDefinitionType type, String projectId) {
         try {
-            List<MockService> mockServices = swaggerParserUtil.parseSwagger(file.getInputStream());
-            for (MockService service : mockServices) {
-                mockServiceRepository.save(service);
-            }
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Swagger file", e);
+            logger.info("Processing file from URL: {}, type: {}, projectId: {}", fileUrl, type, projectId);
+            fileManager.uploadFileFromURL(fileUrl);
+            logger.info("File downloaded and processed successfully from URL.");
+            // Additional logic for processing the file from URL and mock setup
+        } catch (Exception e) {
+            logger.error("Error processing file from URL: {}", e.getMessage(), e);
         }
     }
 
-    // Generate mock response dynamically based on request parameters and the endpoint
-    public String getMockResponse(String requestUri, String method, Map<String, String> params) {
-        MockService service = mockServiceRepository.findByEndpointAndMethod(requestUri, method)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No mock found for this endpoint."));
+    public List<RestMockResponse> getMockResponses(String projectId, String applicationId, String resourceId) {
+        logger.info("Fetching mock responses for projectId: {}, applicationId: {}, resourceId: {}", projectId, applicationId, resourceId);
 
-        // Generate response using the strategy-based ResponseGenerator
-        return responseGenerator.generateResponse(service, params);
+        if (resourceId != null && applicationId != null) {
+            return mockResponseRepository.findByResourceIdAndApplicationIdAndProjectId(resourceId, applicationId, projectId);
+        } else if (applicationId != null) {
+            return mockResponseRepository.findByApplicationIdAndProjectId(applicationId, projectId);
+        } else {
+            return mockResponseRepository.findByProjectId(projectId);
+        }
     }
 }

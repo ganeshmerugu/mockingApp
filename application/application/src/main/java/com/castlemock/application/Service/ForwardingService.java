@@ -11,19 +11,15 @@ public class ForwardingService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    // Forward the request to the original endpoint
-    public String forwardRequest(String originalEndpoint, HttpMethod method, String body) {
-        // Check if method is valid
-        if (method == null) {
-            throw new IllegalArgumentException("Invalid HTTP method");
+    public String forwardRequest(String originalEndpoint, String method, String queryParams) {
+        HttpMethod httpMethod;
+        try {
+            httpMethod = HttpMethod.valueOf(method.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid HTTP method: " + method, e);
         }
-
-        HttpEntity<String> requestEntity = new HttpEntity<>(body);
-
-        // Forward the request
-        ResponseEntity<String> responseEntity = restTemplate.exchange(originalEndpoint, method, requestEntity, String.class);
-
-        // Return the response body from the forwarded request
+        HttpEntity<String> requestEntity = new HttpEntity<>(queryParams);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(originalEndpoint, httpMethod, requestEntity, String.class);
         return responseEntity.getBody();
     }
 }

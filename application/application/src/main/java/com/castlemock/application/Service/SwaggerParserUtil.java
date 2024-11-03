@@ -44,7 +44,7 @@ public class SwaggerParserUtil {
                 MockService mockService = new MockService();
                 mockService.setEndpoint(path);
                 mockService.setMethod(httpMethod.toString());
-                mockService.setResponseStrategy("SEQUENCE");  // Default strategy
+                mockService.setResponseStrategy("RANDOM");  // Default strategy
                 mockService.setMockResponseTemplate("{ \"message\": \"Swagger mock response for " + httpMethod + " at " + path + "\" }");
                 mockServices.add(mockService);
             });

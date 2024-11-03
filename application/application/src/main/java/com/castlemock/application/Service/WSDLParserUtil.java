@@ -4,7 +4,6 @@ import com.castlemock.application.Model.MockService;
 import org.springframework.stereotype.Component;
 import org.xml.sax.InputSource;
 
-
 import javax.wsdl.Definition;
 import javax.wsdl.Operation;
 import javax.wsdl.PortType;

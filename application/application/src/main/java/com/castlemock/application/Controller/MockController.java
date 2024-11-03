@@ -1,48 +1,51 @@
 package com.castlemock.application.Controller;
 
-import com.castlemock.application.Model.MockService;
+import com.castlemock.application.Model.RestMockResponse;
+import com.castlemock.application.Model.mock.rest.RestDefinitionType;
 import com.castlemock.application.Service.MockServiceManager;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @RestController
-@RequestMapping("/mock")  // Centralized route for mock services
+@RequestMapping("/api/mock")
 public class MockController {
 
+    private final MockServiceManager mockServiceManager;
+
     @Autowired
-    private MockServiceManager mockServiceManager;
-
-    // Endpoint to upload and parse RAML file
-    @PostMapping("/upload-raml")
-    public ResponseEntity<String> uploadRamlFile(@RequestParam("file") MultipartFile file) {
-        mockServiceManager.createMockServiceFromRAML(file);
-        return ResponseEntity.ok("RAML file parsed and mock service created.");
+    public MockController(MockServiceManager mockServiceManager) {
+        this.mockServiceManager = mockServiceManager;
+        System.out.println("MockController initialized with MockServiceManager.");
     }
 
-    // Endpoint to upload and parse Swagger file
-    @PostMapping("/upload-swagger")
-    public ResponseEntity<String> uploadSwaggerFile(@RequestParam("file") MultipartFile file) {
-        mockServiceManager.createMockServiceFromSwagger(file);
-        return ResponseEntity.ok("Swagger file parsed and mock service created.");
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadMockFile(@RequestParam("file") MultipartFile file,
+                                                 @RequestParam("type") RestDefinitionType type,
+                                                 @RequestParam("projectId") String projectId) {
+        System.out.println("Received file upload request with type: " + type + " and projectId: " + projectId);
+        mockServiceManager.processUploadedFile(file, type, projectId);
+        return ResponseEntity.ok("File processed successfully.");
     }
 
-    // Endpoint to handle dynamic mock responses
-    @RequestMapping("/**")
-    public ResponseEntity<String> handleMockRequest(HttpServletRequest request) {
-        String requestUri = request.getRequestURI().replace("/mock", "");
-        String method = request.getMethod();
-        Map<String, String> queryParams = request.getParameterMap()
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue()[0]));
-
-        String mockResponse = mockServiceManager.getMockResponse(requestUri, method, queryParams);
-        return ResponseEntity.ok(mockResponse);
+    @PostMapping("/download-and-process")
+    public ResponseEntity<String> processMockFromUrl(@RequestParam("url") String fileUrl,
+                                                     @RequestParam("type") RestDefinitionType type,
+                                                     @RequestParam("projectId") String projectId) {
+        System.out.println("Received download and process request with URL: " + fileUrl + ", type: " + type + ", projectId: " + projectId);
+        mockServiceManager.processFileFromURL(fileUrl, type, projectId);
+        return ResponseEntity.ok("File from URL processed successfully.");
     }
+    @GetMapping("/mocks")
+    public ResponseEntity<List<RestMockResponse>> getMockResponses(
+            @RequestParam("projectId") String projectId,
+            @RequestParam(value = "applicationId", required = false) String applicationId,
+            @RequestParam(value = "resourceId", required = false) String resourceId) {
+        List<RestMockResponse> responses = mockServiceManager.getMockResponses(projectId, applicationId, resourceId);
+        return ResponseEntity.ok(responses);
+    }
+
 }

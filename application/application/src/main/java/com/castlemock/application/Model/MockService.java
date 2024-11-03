@@ -1,7 +1,10 @@
 package com.castlemock.application.Model;
 
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 @Entity
 public class MockService {
@@ -12,11 +15,16 @@ public class MockService {
 
     private String endpoint;
     private String method;
-    private String responseStrategy;  // e.g., RANDOM, SEQUENCE, QUERY_MATCH
-    @Lob
-    private String mockResponseTemplate;  // Large response template storage
+    private String mockResponseTemplate;
 
-    // Getters and setters...
+    // Additional fields
+    private String originalEndpoint;
+    private String responseStrategy;
+    private String restRequestBody;
+
+    // Getters and Setters
+    // ...
+
     public Long getId() {
         return id;
     }
@@ -41,6 +49,22 @@ public class MockService {
         this.method = method;
     }
 
+    public String getMockResponseTemplate() {
+        return mockResponseTemplate;
+    }
+
+    public void setMockResponseTemplate(String mockResponseTemplate) {
+        this.mockResponseTemplate = mockResponseTemplate;
+    }
+
+    public String getOriginalEndpoint() {
+        return originalEndpoint;
+    }
+
+    public void setOriginalEndpoint(String originalEndpoint) {
+        this.originalEndpoint = originalEndpoint;
+    }
+
     public String getResponseStrategy() {
         return responseStrategy;
     }
@@ -49,11 +73,11 @@ public class MockService {
         this.responseStrategy = responseStrategy;
     }
 
-    public String getMockResponseTemplate() {
-        return mockResponseTemplate;
+    public String getRestRequestBody() {
+        return restRequestBody;
     }
 
-    public void setMockResponseTemplate(String mockResponseTemplate) {
-        this.mockResponseTemplate = mockResponseTemplate;
+    public void setRestRequestBody(String restRequestBody) {
+        this.restRequestBody = restRequestBody;
     }
 }
