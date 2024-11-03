@@ -61,4 +61,11 @@ public class MockServiceManager {
             return mockResponseRepository.findByProjectId(projectId);
         }
     }
+    public List<RestMockResponse> getMockResponsesByMethod(Long methodId) {
+        return mockResponseRepository.findByMethodId(methodId);
+    }
+
+    public List<RestMockResponse> getMockResponsesByStatus(String status) {
+        return mockResponseRepository.findByStatus(status);
+    }
 }

@@ -1,13 +1,39 @@
 package com.castlemock.application.Model;
 
+import jakarta.persistence.*;
+
 import java.util.List;
+@Entity
 
 public class RestResource {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     private String applicationId;
     private String name;
     private String uri;
+    @ManyToOne
+    @JoinColumn(name = "application_id")
+    private RestApplication application;
+
+    @OneToMany(mappedBy = "resource", cascade = CascadeType.ALL)
     private List<RestMethod> methods;
+
+    public List<RestMethod> getMethods() {
+        return methods;
+    }
+
+    public void setMethods(List<RestMethod> methods) {
+        this.methods = methods;
+    }
+
+    public RestApplication getApplication() {
+        return application;
+    }
+
+    public void setApplication(RestApplication application) {
+        this.application = application;
+    }
 
     public RestResource(Builder builder) {
         this.id = builder.id;

@@ -1,6 +1,7 @@
 package com.castlemock.application.Model;
 
 import com.castlemock.application.Model.core.HttpHeader;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -20,9 +21,21 @@ public class RestMockResponse {
     private RestMockResponseStatus status;
     // Use @ElementCollection with @Embeddable for httpHeaders
     @ElementCollection
-    @CollectionTable(name = "http_headers", joinColumns = @JoinColumn(name = "response_id"))
+    @CollectionTable(name = "http_headers")
+    @JsonProperty("httpHeaders")
     private List<HttpHeader> httpHeaders;
 
+    @ManyToOne
+    @JoinColumn(name = "method_id", referencedColumnName = "id")
+    private RestMethod method;
+
+    public RestMethod getMethod() {
+        return method;
+    }
+
+    public void setMethod(RestMethod method) {
+        this.method = method;
+    }
 
     public String getApplicationId() {
         return applicationId;

@@ -1,14 +1,40 @@
 package com.castlemock.application.Model;
 
+import jakarta.persistence.*;
+
 import java.util.List;
+@Entity
 
 public class RestMethod {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     private String resourceId;
     private String name;
     private String httpMethod;
     private RestMockResponseStatus status;
+    @ManyToOne
+    @JoinColumn(name = "resource_id", referencedColumnName = "id") // Ensure consistent naming here
+    private RestResource resource;
+
+    @OneToMany(mappedBy = "method", cascade = CascadeType.ALL)
     private List<RestMockResponse> mockResponses;
+
+    public List<RestMockResponse> getMockResponses() {
+        return mockResponses;
+    }
+
+    public void setMockResponses(List<RestMockResponse> mockResponses) {
+        this.mockResponses = mockResponses;
+    }
+
+    public RestResource getResource() {
+        return resource;
+    }
+
+    public void setResource(RestResource resource) {
+        this.resource = resource;
+    }
 
     public RestMethod(Builder builder) {
         this.id = builder.id;

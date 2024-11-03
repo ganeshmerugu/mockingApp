@@ -47,5 +47,14 @@ public class MockController {
         List<RestMockResponse> responses = mockServiceManager.getMockResponses(projectId, applicationId, resourceId);
         return ResponseEntity.ok(responses);
     }
+    @GetMapping("/responses/method/{methodId}")
+    public List<RestMockResponse> getMockResponsesByMethod(@PathVariable Long methodId) {
+        return mockServiceManager.getMockResponsesByMethod(methodId);
+    }
+
+    @GetMapping("/responses/status/{status}")
+    public List<RestMockResponse> getMockResponsesByStatus(@PathVariable String status) {
+        return mockServiceManager.getMockResponsesByStatus(status);
+    }
 
 }

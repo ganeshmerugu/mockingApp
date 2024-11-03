@@ -1,11 +1,17 @@
 package com.castlemock.application.Model;
 
-import java.util.List;
+import jakarta.persistence.*;
 
+import java.util.List;
+@Entity
 public class RestApplication {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     private String projectId;
     private String name;
+    @OneToMany(mappedBy = "application", cascade = CascadeType.ALL)
+
     private List<RestResource> resources;
 
     private RestApplication(Builder builder) {

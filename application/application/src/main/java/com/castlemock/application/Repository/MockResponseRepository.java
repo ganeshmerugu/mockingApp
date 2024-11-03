@@ -8,6 +8,8 @@ import java.util.List;
 
 @Repository
 public interface MockResponseRepository extends JpaRepository<RestMockResponse, String> {
+    List<RestMockResponse> findByMethodId(Long methodId);
+    List<RestMockResponse> findByStatus(String status);
 
     // Custom query methods to find responses based on various IDs
     List<RestMockResponse> findByProjectId(String projectId);
