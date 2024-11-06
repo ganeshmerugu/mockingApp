@@ -59,7 +59,7 @@ public class WADLRestDefinitionConverter implements RestDefinitionConverter {
             List<RestMethod> methods = parseMethods(resourceElement, resourceId, generateResponse);
 
             RestResource restResource = RestResource.builder()
-                    .id(resourceId)
+                    .id(Long.getLong(resourceId))
                     .applicationId(applicationId)
                     .name(resourcePath)
                     .uri(resourcePath)

@@ -1,6 +1,7 @@
 package com.castlemock.application.Service.converter.raml;
 
 import com.castlemock.application.Model.RestApplication;
+import com.castlemock.application.Model.RestMockResponse;
 import com.castlemock.application.Model.RestResource;
 import com.castlemock.application.Model.core.utility.IdUtility;
 import com.castlemock.application.Service.converter.RestDefinitionConverter;
@@ -22,7 +23,10 @@ public class RAMLRestDefinitionConverter implements RestDefinitionConverter {
 
     private List<RestApplication> convert(RamlModelResult ramlModelResult, String projectId, boolean generateResponse) {
         if (!ramlModelResult.getValidationResults().isEmpty()) {
-            throw new IllegalStateException("Unable to parse the RAML file");
+            ramlModelResult.getValidationResults().forEach(validationResult -> {
+                System.err.println("Validation Error: " + validationResult.getMessage());
+            });
+            throw new IllegalStateException("Unable to parse the RAML file due to validation errors.");
         }
 
         List<RestResource> resources = new ArrayList<>();
@@ -39,9 +43,9 @@ public class RAMLRestDefinitionConverter implements RestDefinitionConverter {
                 .resources(resources)
                 .build());
     }
+
     @Override
     public List<RestApplication> convert(File file, String projectId, boolean generateResponse) {
-        // Implement RAML conversion logic here
-        return List.of();
+        return convertRAMLFile(file, projectId, generateResponse);
     }
 }

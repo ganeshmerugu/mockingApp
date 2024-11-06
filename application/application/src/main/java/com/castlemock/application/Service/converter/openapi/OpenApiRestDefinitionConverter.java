@@ -62,7 +62,7 @@ public class OpenApiRestDefinitionConverter implements RestDefinitionConverter {
             }
 
             resources.add(RestResource.builder()
-                    .id(resourceId)
+                    .id(Long.getLong(resourceId))
                     .applicationId(applicationId)
                     .name(resourceName)
                     .uri(resourceName)
@@ -126,9 +126,19 @@ public class OpenApiRestDefinitionConverter implements RestDefinitionConverter {
                 .status(RestMockResponseStatus.ENABLED)
                 .build();
     }
+
     @Override
     public List<RestApplication> convert(File file, String projectId, boolean generateResponse) {
-        // Implement OpenAPI conversion logic here
-        return List.of();
+        return convertOpenApiFile(file, projectId, generateResponse);
+    }
+
+    private RestMockResponse createDefaultMockResponse(String methodId) {
+        return RestMockResponse.builder()
+                .id(IdUtility.generateId())
+                .methodId(methodId)
+                .httpStatusCode(200)
+                .body("{\"message\": \"Mock response\"}")
+                .status(RestMockResponseStatus.ENABLED)
+                .build();
     }
 }

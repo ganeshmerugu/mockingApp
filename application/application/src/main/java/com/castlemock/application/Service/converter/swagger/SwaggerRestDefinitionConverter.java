@@ -19,10 +19,9 @@ public class SwaggerRestDefinitionConverter implements RestDefinitionConverter {
     public List<RestApplication> convertSwaggerFile(File file, String projectId, boolean generateResponse) {
         Swagger swagger = new SwaggerParser().read(file.getAbsolutePath());
         if (swagger == null) {
-            throw new IllegalArgumentException("Unable to parse the Swagger content.");
+            throw new IllegalArgumentException("Unable to parse the Swagger file.");
         }
-        RestApplication restApplication = convertSwagger(swagger, projectId, generateResponse);
-        return List.of(restApplication);
+        return List.of(convertSwagger(swagger, projectId, generateResponse));
     }
 
     private RestApplication convertSwagger(Swagger swagger, String projectId, boolean generateResponse) {
@@ -43,7 +42,7 @@ public class SwaggerRestDefinitionConverter implements RestDefinitionConverter {
             }
 
             resources.add(RestResource.builder()
-                    .id(resourceId)
+                    .id(Long.getLong(resourceId))
                     .applicationId(applicationId)
                     .name(resourceName)
                     .uri(resourceName)
@@ -85,9 +84,7 @@ public class SwaggerRestDefinitionConverter implements RestDefinitionConverter {
 
         List<HttpHeader> headers = new ArrayList<>();
         if (response.getHeaders() != null) {
-            response.getHeaders().forEach((key, header) ->
-                    headers.add(HttpHeader.builder().name(key).value("").build())
-            );
+            response.getHeaders().forEach((key, header) -> headers.add(HttpHeader.builder().name(key).value("").build()));
         }
 
         return RestMockResponse.builder()
@@ -99,8 +96,9 @@ public class SwaggerRestDefinitionConverter implements RestDefinitionConverter {
                 .status(RestMockResponseStatus.ENABLED)
                 .build();
     }
+
     @Override
     public List<RestApplication> convert(File file, String projectId, boolean generateResponse) {
-        return List.of();
+        return convertSwaggerFile(file, projectId, generateResponse);
     }
 }

@@ -7,6 +7,7 @@ import java.util.List;
 public class RestMockResponseBuilder {
 
     private String id;
+    private String methodId; // Add methodId field here
     private String name;
     private String body = ""; // Default to an empty string
     private Integer httpStatusCode = 200; // Default to 200
@@ -16,6 +17,10 @@ public class RestMockResponseBuilder {
     // Getter methods for internal use in RestMockResponse
     String getId() {
         return id;
+    }
+
+    String getMethodId() { // Getter for methodId
+        return methodId;
     }
 
     String getName() {
@@ -44,6 +49,11 @@ public class RestMockResponseBuilder {
         return this;
     }
 
+    public RestMockResponseBuilder methodId(String methodId) { // Method for setting methodId
+        this.methodId = methodId;
+        return this;
+    }
+
     public RestMockResponseBuilder name(String name) {
         this.name = name;
         return this;
@@ -69,8 +79,8 @@ public class RestMockResponseBuilder {
         return this;
     }
 
-    // Final build method to create an instance of RestMockResponse
-    public RestMockResponse build() {
-        return new RestMockResponse(this);
-    }
+//    // Final build method to create an instance of RestMockResponse
+//    public RestMockResponse build() {
+//        return new RestMockResponse(this);
+//    }
 }

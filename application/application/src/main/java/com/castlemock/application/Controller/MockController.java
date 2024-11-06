@@ -1,9 +1,11 @@
 package com.castlemock.application.Controller;
 
 import com.castlemock.application.Model.RestMockResponse;
+import com.castlemock.application.Model.RestMockResponseStatus;
 import com.castlemock.application.Model.mock.rest.RestDefinitionType;
 import com.castlemock.application.Service.MockServiceManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,8 +29,12 @@ public class MockController {
                                                  @RequestParam("type") RestDefinitionType type,
                                                  @RequestParam("projectId") String projectId) {
         System.out.println("Received file upload request with type: " + type + " and projectId: " + projectId);
-        mockServiceManager.processUploadedFile(file, type, projectId);
-        return ResponseEntity.ok("File processed successfully.");
+        try {
+            mockServiceManager.processUploadedFile(file, type, projectId);
+            return ResponseEntity.ok("File processed successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing file: " + e.getMessage());
+        }
     }
 
     @PostMapping("/download-and-process")
@@ -36,8 +42,12 @@ public class MockController {
                                                      @RequestParam("type") RestDefinitionType type,
                                                      @RequestParam("projectId") String projectId) {
         System.out.println("Received download and process request with URL: " + fileUrl + ", type: " + type + ", projectId: " + projectId);
-        mockServiceManager.processFileFromURL(fileUrl, type, projectId);
-        return ResponseEntity.ok("File from URL processed successfully.");
+        try {
+            mockServiceManager.processFileFromURL(fileUrl, type, projectId);
+            return ResponseEntity.ok("File from URL processed successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing file from URL: " + e.getMessage());
+        }
     }
     @GetMapping("/mocks")
     public ResponseEntity<List<RestMockResponse>> getMockResponses(
@@ -48,12 +58,12 @@ public class MockController {
         return ResponseEntity.ok(responses);
     }
     @GetMapping("/responses/method/{methodId}")
-    public List<RestMockResponse> getMockResponsesByMethod(@PathVariable Long methodId) {
+    public List<RestMockResponse> getMockResponsesByMethod(@PathVariable String methodId) { // Change Long to String
         return mockServiceManager.getMockResponsesByMethod(methodId);
     }
 
     @GetMapping("/responses/status/{status}")
-    public List<RestMockResponse> getMockResponsesByStatus(@PathVariable String status) {
+    public List<RestMockResponse> getMockResponsesByStatus(@PathVariable RestMockResponseStatus status) {
         return mockServiceManager.getMockResponsesByStatus(status);
     }
 
