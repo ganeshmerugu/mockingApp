@@ -7,10 +7,55 @@ import java.util.UUID;
 @Entity
 public class RestMethod {
 
-    @Id
-    private String id;
 
-    @Column(name = "resource_id")  // Use consistent naming
+    @Id
+    private String id = UUID.randomUUID().toString();
+
+    public String getResourceId() {
+        return resourceId;
+    }
+
+    public void setResourceId(String resourceId) {
+        this.resourceId = resourceId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getHttpMethod() {
+        return httpMethod;
+    }
+
+    public void setHttpMethod(String httpMethod) {
+        this.httpMethod = httpMethod;
+    }
+
+    public RestMockResponseStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(RestMockResponseStatus status) {
+        this.status = status;
+    }
+
+    public RestResource getResource() {
+        return resource;
+    }
+
+    public void setResource(RestResource resource) {
+        this.resource = resource;
+    }
+
+    public void setMockResponses(List<RestMockResponse> mockResponses) {
+        this.mockResponses = mockResponses;
+    }
+
+    @Column(name = "resource_id")
     private String resourceId;
 
     private String name;
@@ -20,17 +65,15 @@ public class RestMethod {
     private RestMockResponseStatus status;
 
     @ManyToOne
-    @JoinColumn(name = "resource_id", referencedColumnName = "id",insertable=false, updatable=false) // Link resource_id to id in RestResource
+    @JoinColumn(name = "resource_id", referencedColumnName = "id", insertable = false, updatable = false)
     private RestResource resource;
-    public void setResource(RestResource resource) {
-        this.resource = resource;
-    }
 
-    @OneToMany(mappedBy = "method", cascade = CascadeType.ALL)  // Ensure mappedBy is aligned with RestMockResponse
+    @OneToMany(mappedBy = "method", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RestMockResponse> mockResponses;
+    // Public no-argument constructor required by Hibernate
+    public RestMethod() {}
 
-
-    private RestMethod(Builder builder) {
+    private RestMethod(RestMethodBuilder builder) {
         this.id = builder.id;
         this.resourceId = builder.resourceId;
         this.name = builder.name;
@@ -39,36 +82,32 @@ public class RestMethod {
         this.mockResponses = builder.mockResponses;
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    // Getters and Setters
-    public String getId() { return id; }
-    public String getResourceId() { return resourceId; }
-    public String getName() { return name; }
-    public String getHttpMethod() { return httpMethod; }
-    public RestMockResponseStatus getStatus() { return status; }
-    public List<RestMockResponse> getMockResponses() { return mockResponses; }
-    public RestResource getResource() { return resource; }
-
-    public static class Builder {
+    public static class RestMethodBuilder {
         private String id = UUID.randomUUID().toString();
         private String resourceId;
         private String name;
         private String httpMethod;
-        private RestMockResponseStatus status;
+        private RestMockResponseStatus status = RestMockResponseStatus.ENABLED;
         private List<RestMockResponse> mockResponses;
 
-        public Builder id(String id) { this.id = id; return this; }
-        public Builder resourceId(String resourceId) { this.resourceId = resourceId; return this; }
-        public Builder name(String name) { this.name = name; return this; }
-        public Builder httpMethod(String httpMethod) { this.httpMethod = httpMethod; return this; }
-        public Builder status(RestMockResponseStatus status) { this.status = status; return this; }
-        public Builder mockResponses(List<RestMockResponse> mockResponses) { this.mockResponses = mockResponses; return this; }
-
-        public RestMethod build() {
-            return new RestMethod(this);
+        public RestMethodBuilder id(String id) { this.id = id; return this; }
+        public RestMethodBuilder resourceId(String resourceId) { this.resourceId = resourceId; return this; }
+        public RestMethodBuilder name(String name) { this.name = name; return this; }
+        public RestMethodBuilder httpMethod(String httpMethod) { this.httpMethod = httpMethod; return this; }
+        public RestMethodBuilder status(RestMockResponseStatus status) { this.status = status; return this; }
+        public RestMethodBuilder mockResponses(List<RestMockResponse> mockResponses) {
+            this.mockResponses = mockResponses;
+            return this;
         }
+
+        public RestMethod build() { return new RestMethod(this); }
     }
+
+    public static RestMethodBuilder builder() { return new RestMethodBuilder(); }
+
+    // Getters
+    public String getId() { return id; }
+    public List<RestMockResponse> getMockResponses() { return mockResponses; }
+
+    // Setters and other methods as needed...
 }

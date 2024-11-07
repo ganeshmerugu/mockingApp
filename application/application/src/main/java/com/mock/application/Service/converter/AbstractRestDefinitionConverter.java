@@ -7,16 +7,17 @@ import com.mock.application.Model.core.utility.IdUtility;
 
 import java.util.Collections;
 import java.util.List;
+import com.mock.application.Model.RestMethod;
 
 public abstract class AbstractRestDefinitionConverter implements RestDefinitionConverter {
 
     protected static final String AUTO_GENERATED_MOCK_RESPONSE_DEFAULT_NAME = "Auto-generated mocked response";
     protected static final int DEFAULT_RESPONSE_CODE = 200;
 
-    protected RestMockResponse generateResponse(final String methodId) {
+    protected RestMockResponse generateResponse(final RestMethod method) {
         return RestMockResponse.builder()
                 .id(IdUtility.generateId())
-                .methodId(methodId)
+                .method(method) // Link to the RestMethod object directly
                 .name(AUTO_GENERATED_MOCK_RESPONSE_DEFAULT_NAME)
                 .httpStatusCode(DEFAULT_RESPONSE_CODE)
                 .status(RestMockResponseStatus.ENABLED)

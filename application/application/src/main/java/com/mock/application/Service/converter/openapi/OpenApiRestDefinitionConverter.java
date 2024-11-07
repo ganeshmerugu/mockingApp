@@ -3,6 +3,7 @@ package com.mock.application.Service.converter.openapi;
 import com.mock.application.Model.*;
 import com.mock.application.Model.core.HttpHeader;
 import com.mock.application.Model.core.utility.IdUtility;
+import com.mock.application.Service.RestResponseService;
 import com.mock.application.Service.converter.RestDefinitionConverter;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -12,9 +13,9 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import org.apache.commons.logging.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -22,11 +23,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
 @Service
 public class OpenApiRestDefinitionConverter implements RestDefinitionConverter {
     private static final Logger log = LoggerFactory.getLogger(OpenApiRestDefinitionConverter.class);
 
+    private final RestResponseService restResponseService;
+
+    @Autowired
+    public OpenApiRestDefinitionConverter(RestResponseService restResponseService) {
+        this.restResponseService = restResponseService;
+    }
 
     public List<RestApplication> convertOpenApiFile(File file, String projectId, boolean generateResponse) {
         ParseOptions parseOptions = new ParseOptions();
@@ -68,7 +74,7 @@ public class OpenApiRestDefinitionConverter implements RestDefinitionConverter {
             }
 
             resources.add(RestResource.builder()
-                    .id(Long.getLong(resourceId))
+                    .id(resourceId)
                     .applicationId(applicationId)
                     .name(resourceName)
                     .uri(resourceName)
@@ -86,35 +92,40 @@ public class OpenApiRestDefinitionConverter implements RestDefinitionConverter {
 
     private RestMethod createRestMethod(Operation operation, String httpMethod, String resourceId, boolean generateResponse) {
         String methodId = IdUtility.generateId();
-        if (methodId == null) {
-            log.error("Generated methodId is null for operation: {}", operation.getOperationId());
-            throw new IllegalStateException("Method ID cannot be null");
-        }
 
-        List<RestMockResponse> mockResponses = new ArrayList<>();
-        if (generateResponse) {
-            ApiResponses apiResponses = operation.getResponses();
-            if (apiResponses != null) {
-                for (Map.Entry<String, ApiResponse> entry : apiResponses.entrySet()) {
-                    RestMockResponse mockResponse = generateMockResponse(methodId, entry.getKey(), entry.getValue());
-                    mockResponses.add(mockResponse);
-                }
-            }
-        }
-
-        return RestMethod.builder()
+        RestMethod restMethod = RestMethod.builder()
                 .id(methodId)
                 .resourceId(resourceId)
                 .name(operation.getOperationId() != null ? operation.getOperationId() : httpMethod)
                 .httpMethod(httpMethod)
                 .status(RestMockResponseStatus.ENABLED)
+                .build();
+
+        List<RestMockResponse> mockResponses = new ArrayList<>();
+
+        if (generateResponse) {
+            ApiResponses apiResponses = operation.getResponses();
+            if (apiResponses != null) {
+                for (Map.Entry<String, ApiResponse> entry : apiResponses.entrySet()) {
+                    RestMockResponse mockResponse = generateMockResponse(entry.getKey(), entry.getValue(), restMethod);
+                    mockResponses.add(mockResponse);
+                }
+            }
+        }
+
+        restMethod = RestMethod.builder()
+                .id(restMethod.getId())
+                .resourceId(restMethod.getResourceId())
+                .name(restMethod.getName())
+                .httpMethod(restMethod.getHttpMethod())
+                .status(restMethod.getStatus())
                 .mockResponses(mockResponses)
                 .build();
-    }
 
-    private RestMockResponse generateMockResponse(String methodId, String responseCode, ApiResponse apiResponse) {
+        return restMethod;
+    }
+    private RestMockResponse generateMockResponse(String responseCode, ApiResponse apiResponse, RestMethod method) {
         int httpStatusCode = responseCode != null ? Integer.parseInt(responseCode) : 200;
-        String responseBody = apiResponse.getDescription() != null ? apiResponse.getDescription() : "{}";
 
         List<HttpHeader> headers = new ArrayList<>();
         if (apiResponse.getHeaders() != null) {
@@ -124,32 +135,18 @@ public class OpenApiRestDefinitionConverter implements RestDefinitionConverter {
                         : "";
                 headers.add(HttpHeader.builder().name(key).value(headerValue).build());
             });
-        } else {
-            log.warn("No headers found for response with code {}", responseCode);
         }
 
         return RestMockResponse.builder()
-                .id(IdUtility.generateId())
-                .methodId(methodId)
+                .method(method) // Set the method reference directly
                 .httpStatusCode(httpStatusCode)
-                .body(responseBody)
                 .httpHeaders(headers)
-                .status(RestMockResponseStatus.ENABLED)
+                .body(apiResponse.getDescription())
                 .build();
     }
 
     @Override
     public List<RestApplication> convert(File file, String projectId, boolean generateResponse) {
         return convertOpenApiFile(file, projectId, generateResponse);
-    }
-
-    private RestMockResponse createDefaultMockResponse(String methodId) {
-        return RestMockResponse.builder()
-                .id(IdUtility.generateId())
-                .methodId(methodId)
-                .httpStatusCode(200)
-                .body("{\"message\": \"Mock response\"}")
-                .status(RestMockResponseStatus.ENABLED)
-                .build();
     }
 }

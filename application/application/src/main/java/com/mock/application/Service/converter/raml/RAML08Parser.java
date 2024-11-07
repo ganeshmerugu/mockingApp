@@ -20,10 +20,11 @@ public class RAML08Parser extends AbstractRAMLParser {
         for (Resource resource : resources) {
             String uri = path + resource.relativeUri().value();
             String resourceId = IdUtility.generateId();
+
             List<RestMethod> methods = createMethods(resource.methods(), resourceId, generateResponse);
 
             result.add(RestResource.builder()
-                    .id(Long.getLong(resourceId))
+                    .id(resourceId)
                     .name(uri)
                     .uri(uri)
                     .methods(methods)
@@ -37,6 +38,7 @@ public class RAML08Parser extends AbstractRAMLParser {
         return methods.stream().map(method -> {
             List<RestMockResponse> mockResponses = generateResponse ? createMockResponses(method.responses()) : new ArrayList<>();
 
+            // Use builder to set responses directly in RestMethod
             return RestMethod.builder()
                     .id(IdUtility.generateId())
                     .resourceId(resourceId)
@@ -59,10 +61,8 @@ public class RAML08Parser extends AbstractRAMLParser {
             List<HttpHeader> headers = getHeadersV08(response);
 
             RestMockResponse mockResponse = RestMockResponse.builder()
-                    .id(IdUtility.generateId())
-                    .methodId("Auto-generated Response")
-                    .body(body)
                     .httpStatusCode(httpStatusCode)
+                    .body(body)
                     .status(status)
                     .httpHeaders(headers)
                     .build();
@@ -74,7 +74,7 @@ public class RAML08Parser extends AbstractRAMLParser {
 
     protected String getBodyContentV08(org.raml.v2.api.model.v08.bodies.Response response) {
         if (response != null && response.body() != null && !response.body().isEmpty()) {
-            var bodyLike = response.body().get(0);  // TypeDeclaration instead of BodyLike
+            var bodyLike = response.body().get(0);
             if (bodyLike.example() != null) {
                 return bodyLike.example().value();
             }
@@ -92,5 +92,4 @@ public class RAML08Parser extends AbstractRAMLParser {
         }
         return headers;
     }
-
 }

@@ -2,8 +2,9 @@ package com.mock.application.Service.converter.wadl;
 
 import com.mock.application.Model.*;
 import com.mock.application.Model.core.utility.IdUtility;
+import com.mock.application.Service.RestResponseService;
 import com.mock.application.Service.converter.RestDefinitionConverter;
-import com.mock.application.Service.core.manager.FileManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -17,10 +18,12 @@ import java.util.List;
 
 @Service
 public class WADLRestDefinitionConverter implements RestDefinitionConverter {
-    private final FileManager fileManager;
 
-    public WADLRestDefinitionConverter(FileManager fileManager) {
-        this.fileManager = fileManager;
+    private final RestResponseService restResponseService;
+
+    @Autowired
+    public WADLRestDefinitionConverter(RestResponseService restResponseService) {
+        this.restResponseService = restResponseService;
     }
 
     public List<RestApplication> convertWADLFile(File file, String projectId, boolean generateResponse) {
@@ -59,7 +62,7 @@ public class WADLRestDefinitionConverter implements RestDefinitionConverter {
             List<RestMethod> methods = parseMethods(resourceElement, resourceId, generateResponse);
 
             RestResource restResource = RestResource.builder()
-                    .id(Long.getLong(resourceId))
+                    .id(resourceId)
                     .applicationId(applicationId)
                     .name(resourcePath)
                     .uri(resourcePath)
@@ -80,9 +83,7 @@ public class WADLRestDefinitionConverter implements RestDefinitionConverter {
             String methodName = methodElement.getAttribute("id");
             String httpMethod = methodElement.getAttribute("name");
 
-            List<RestMockResponse> mockResponses = generateResponse
-                    ? generateMockResponses(methodElement)
-                    : new ArrayList<>();
+            List<RestMockResponse> mockResponses = generateResponse ? generateMockResponses(methodElement) : new ArrayList<>();
 
             RestMethod restMethod = RestMethod.builder()
                     .id(IdUtility.generateId())
@@ -105,22 +106,15 @@ public class WADLRestDefinitionConverter implements RestDefinitionConverter {
         for (int i = 0; i < responseNodes.getLength(); i++) {
             Element responseElement = (Element) responseNodes.item(i);
             String statusCode = responseElement.getAttribute("status");
-
-            String body = "";
-            NodeList representationNodes = responseElement.getElementsByTagName("representation");
-            if (representationNodes.getLength() > 0) {
-                Element representationElement = (Element) representationNodes.item(0);
-                body = representationElement.getAttribute("mediaType");
-            }
+            String body = ""; // Initialize with default or specific body content if needed
 
             RestMockResponse mockResponse = RestMockResponse.builder()
-                    .id(IdUtility.generateId())
-                    .methodId(IdUtility.generateId())
                     .httpStatusCode(Integer.parseInt(statusCode))
                     .body(body)
                     .status(RestMockResponseStatus.ENABLED)
                     .build();
 
+            restResponseService.saveResponse(mockResponse, body);
             mockResponses.add(mockResponse);
         }
         return mockResponses;
@@ -128,8 +122,6 @@ public class WADLRestDefinitionConverter implements RestDefinitionConverter {
 
     @Override
     public List<RestApplication> convert(File file, String projectId, boolean generateResponse) {
-        return List.of();
+        return convertWADLFile(file, projectId, generateResponse);
     }
-
-
 }

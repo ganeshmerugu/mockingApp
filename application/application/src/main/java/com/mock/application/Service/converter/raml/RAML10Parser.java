@@ -14,7 +14,8 @@ import org.raml.v2.api.model.v10.resources.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RAML10Parser extends AbstractRAMLParser {
+public class
+RAML10Parser extends AbstractRAMLParser {
 
     public void getResources(List<Resource> resources, List<RestResource> result, String path, boolean generateResponse) {
         if (resources.isEmpty()) return;
@@ -35,18 +36,28 @@ public class RAML10Parser extends AbstractRAMLParser {
         }
     }
 
-    private List<RestMethod> createMethods(List<org.raml.v2.api.model.v10.methods.Method> methods, String resourceId, boolean generateResponse) {
+    private List<RestMethod> createMethods(List<Method> methods, String resourceId, boolean generateResponse) {
         List<RestMethod> restMethods = new ArrayList<>();
 
         for (Method method : methods) {
-            List<RestMockResponse> mockResponses = generateResponse ? createMockResponsesForV10(method.responses()) : new ArrayList<>();
-
             RestMethod restMethod = RestMethod.builder()
                     .id(IdUtility.generateId())
                     .resourceId(resourceId)
                     .name(method.method())
                     .httpMethod(method.method())
                     .status(RestMockResponseStatus.ENABLED)
+                    .build();
+
+            // Create mock responses and link them to the RestMethod instance
+            List<RestMockResponse> mockResponses = generateResponse ? createMockResponsesForV10(method.responses(), restMethod) : new ArrayList<>();
+
+            // Assign mockResponses directly in the builder
+            restMethod = RestMethod.builder()
+                    .id(restMethod.getId())
+                    .resourceId(restMethod.getResourceId())
+                    .name(restMethod.getName())
+                    .httpMethod(restMethod.getHttpMethod())
+                    .status(restMethod.getStatus())
                     .mockResponses(mockResponses)
                     .build();
 
@@ -56,7 +67,7 @@ public class RAML10Parser extends AbstractRAMLParser {
         return restMethods;
     }
 
-    protected List<RestMockResponse> createMockResponsesForV10(List<org.raml.v2.api.model.v10.bodies.Response> responses) {
+    protected List<RestMockResponse> createMockResponsesForV10(List<Response> responses, RestMethod restMethod) {
         List<RestMockResponse> mockResponses = new ArrayList<>();
 
         if (responses == null || responses.isEmpty()) {
@@ -64,7 +75,7 @@ public class RAML10Parser extends AbstractRAMLParser {
             return mockResponses;
         }
 
-        for (org.raml.v2.api.model.v10.bodies.Response response : responses) {
+        for (Response response : responses) {
             String responseCode = response.code().value();
             int httpStatusCode = parseStatusCode(responseCode);
             RestMockResponseStatus status = getStatusBasedOnCode(httpStatusCode);
@@ -75,7 +86,7 @@ public class RAML10Parser extends AbstractRAMLParser {
             // Using the builder pattern to create a RestMockResponse instance
             RestMockResponse mockResponse = RestMockResponse.builder()
                     .id(IdUtility.generateId())
-                    .methodId("Auto-generated Response")
+                    .method(restMethod) // Link the response with the RestMethod instance
                     .body(body)
                     .httpStatusCode(httpStatusCode)
                     .status(status)
@@ -85,9 +96,6 @@ public class RAML10Parser extends AbstractRAMLParser {
             mockResponses.add(mockResponse);
         }
 
-        if (mockResponses.isEmpty()) {
-            System.out.println("No mock responses were generated.");
-        }
         return mockResponses;
     }
 

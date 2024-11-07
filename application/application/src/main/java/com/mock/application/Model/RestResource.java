@@ -1,7 +1,6 @@
 package com.mock.application.Model;
 
 import jakarta.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -10,14 +9,15 @@ import java.util.UUID;
 @Table(name = "rest_resource")
 public class RestResource {
 
-
     @Id
     private String id = UUID.randomUUID().toString();
 
-    @Column(name = "application_id")  // Maps to "application_id" in the database
+    @Column(name = "application_id")
     private String appId;
+
     private String name;
     private String uri;
+
     @ManyToOne
     @JoinColumn(name = "application_id", referencedColumnName = "id", insertable = false, updatable = false)
     private RestApplication application;
@@ -32,10 +32,11 @@ public class RestResource {
     public void setApplication(RestApplication application) {
         this.application = application;
     }
-
+    // No-argument constructor required by Hibernate
+    public RestResource() {}
     // Private constructor to enforce the use of Builder
-    public RestResource(Builder builder) {
-        this.id = String.valueOf(builder.id);
+    private RestResource(Builder builder) {
+        this.id = builder.id;
         this.appId = builder.applicationId;
         this.name = builder.name;
         this.uri = builder.uri;
@@ -50,15 +51,15 @@ public class RestResource {
         return new Builder();
     }
 
-    // Builder class with updated id type to Long
+    // Builder class with updated id type to String
     public static class Builder {
-        private Long id; // Changed to Long
+        private String id;  // Change to String type
         private String applicationId;
         private String name;
         private String uri;
         private List<RestMethod> methods;
 
-        public Builder id(Long id) {
+        public Builder id(String id) {  // Adjusted to accept String
             this.id = id;
             return this;
         }
@@ -109,8 +110,8 @@ public class RestResource {
         return methods;
     }
 
-    public void setId(Long id) {
-        this.id = String.valueOf(id);
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setApplicationId(String applicationId) {
