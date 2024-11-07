@@ -1,0 +1,37 @@
+swagger: '2.0'
+info:
+  title: Sample API
+  version: 1.0.0
+host: api.example.com
+basePath: /v1
+schemes:
+  - http
+paths:
+  /users:
+    get:
+      summary: Get a list of users
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+    post:
+      summary: Create a new user
+      parameters:
+        - in: body
+          name: user
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        201:
+          description: User created
+definitions:
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string

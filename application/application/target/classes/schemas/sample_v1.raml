@@ -1,0 +1,30 @@
+#%RAML 1.0
+title: Sample API
+version: v1
+baseUri: http://api.example.com/{version}
+
+types:
+  User:
+    type: object
+    properties:
+      id: integer
+      name: string
+
+/users:
+  get:
+    description: Retrieve a list of users
+    responses:
+      200:
+        body:
+          application/json:
+            type: User[]
+  post:
+    description: Create a new user
+    body:
+      application/json:
+        type: User
+    responses:
+      201:
+        body:
+          application/json:
+            type: User
