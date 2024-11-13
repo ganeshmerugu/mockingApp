@@ -1,6 +1,8 @@
 package com.mock.application.Service;
 
 import com.mock.application.Model.*;
+import com.mock.application.Model.core.HttpHeader;
+import com.mock.application.Model.core.utility.IdUtility;
 import com.mock.application.Model.mock.rest.RestDefinitionType;
 import com.mock.application.Repository.*;
 import com.mock.application.Service.converter.openapi.OpenApiRestDefinitionConverter;
@@ -12,9 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,6 +28,7 @@ public class MockServiceManager {
 
     private final FileManager fileManager;
     private final MockResponseRepository mockResponseRepository;
+    private final MockServiceRepository mockServiceRepository;
     private final RestApplicationRepository restApplicationRepository;
     private final RestMethodRepository restMethodRepository;
     private final RestResourceRepository restResourceRepository;
@@ -31,19 +36,23 @@ public class MockServiceManager {
     private final OpenApiRestDefinitionConverter openApiRestDefinitionConverter;
     private final SwaggerRestDefinitionConverter swaggerRestDefinitionConverter;
     private final WADLRestDefinitionConverter wadlRestDefinitionConverter;
+    private final MockResponseService mockResponseService;
 
     @Autowired
     public MockServiceManager(FileManager fileManager,
                               MockResponseRepository mockResponseRepository,
+                              MockServiceRepository mockServiceRepository,
                               RestApplicationRepository restApplicationRepository,
                               RestMethodRepository restMethodRepository,
                               RestResourceRepository restResourceRepository,
                               RAMLRestDefinitionConverter ramlRestDefinitionConverter,
                               OpenApiRestDefinitionConverter openApiRestDefinitionConverter,
                               SwaggerRestDefinitionConverter swaggerRestDefinitionConverter,
-                              WADLRestDefinitionConverter wadlRestDefinitionConverter) {
+                              WADLRestDefinitionConverter wadlRestDefinitionConverter,
+                              MockResponseService mockResponseService) {
         this.fileManager = fileManager;
         this.mockResponseRepository = mockResponseRepository;
+        this.mockServiceRepository = mockServiceRepository;
         this.restApplicationRepository = restApplicationRepository;
         this.restMethodRepository = restMethodRepository;
         this.restResourceRepository = restResourceRepository;
@@ -51,11 +60,9 @@ public class MockServiceManager {
         this.openApiRestDefinitionConverter = openApiRestDefinitionConverter;
         this.swaggerRestDefinitionConverter = swaggerRestDefinitionConverter;
         this.wadlRestDefinitionConverter = wadlRestDefinitionConverter;
-
-        logger.info("MockServiceManager initialized with converters for RAML, OpenAPI, Swagger, and WADL.");
+        this.mockResponseService = mockResponseService;
     }
 
-    // Process file uploaded from MultipartFile input
     public void processUploadedFile(MultipartFile file, RestDefinitionType type, String projectId) {
         try {
             logger.info("Received file upload for projectId: {}, type: {}", projectId, type);
@@ -66,7 +73,105 @@ public class MockServiceManager {
         }
     }
 
-    // Process file directly from URL
+    private void processFile(File file, RestDefinitionType type, String projectId) {
+        try {
+            logger.info("Processing file for projectId: {}, type: {}", projectId, type);
+            List<RestApplication> applications = switch (type) {
+                case RAML -> ramlRestDefinitionConverter.convert(file, projectId, true);
+                case OPENAPI -> openApiRestDefinitionConverter.convert(file, projectId, true);
+                case SWAGGER -> swaggerRestDefinitionConverter.convert(file, projectId, true);
+                case WADL -> wadlRestDefinitionConverter.convert(file, projectId, true);
+                default -> throw new IllegalArgumentException("Unsupported API type: " + type);
+            };
+            saveGeneratedMocks(applications, projectId);
+        } catch (Exception e) {
+            logger.error("Error processing file: {}", e.getMessage(), e);
+        }
+    }
+
+    @Transactional
+    private void saveGeneratedMocks(List<RestApplication> applications, String projectId) {
+        applications.forEach(app -> {
+            // Step 1: Set projectId and save the RestApplication, ensuring the ID is generated and flushed
+            app.setProjectId(projectId);
+            RestApplication savedApp = restApplicationRepository.saveAndFlush(app); // save and flush to ensure ID generation
+
+            for (RestResource resource : app.getResources()) {
+                // Step 2: Set the application ID in the RestResource to the saved RestApplication's ID
+                resource.setAppId(savedApp.getId());
+                resource.setApplication(savedApp);
+
+                for (RestMethod method : resource.getMethods()) {
+                    method.setResource(resource); // Link RestMethod to RestResource
+
+                    for (RestMockResponse mockResponse : method.getMockResponses()) {
+                        // Assign foreign keys in RestMockResponse
+                        mockResponse.setApplicationId(savedApp.getId());
+                        mockResponse.setLinkedResourceId(resource.getId());
+                        mockResponse.setMethod(method);
+                        mockResponse.setProjectId(projectId);
+                    }
+
+                    mockResponseRepository.saveAll(method.getMockResponses());
+
+                    // Save a MockService entry for each method if needed
+                    createAndSaveMockService(resource.getUri(), method.getHttpMethod(), mockResponseTemplate(method), projectId, requestBody(method));
+                }
+
+                // Step 3: Save RestResource with assigned application ID and application reference
+                restResourceRepository.save(resource);
+            }
+
+            // Finalize by saving the fully populated RestApplication with all nested data
+            restApplicationRepository.save(savedApp);
+        });
+    }
+
+
+
+
+    private void createAndSaveMockService(String endpoint, String httpMethod, String mockResponseTemplate, String projectId, String requestBody) {
+        MockService mockService = new MockService();
+        mockService.setEndpoint(endpoint);
+        mockService.setMethod(httpMethod);
+        mockService.setMockResponseTemplate(mockResponseTemplate);
+        mockService.setOriginalEndpoint(endpoint);
+        mockService.setResponseStrategy("default");
+        mockService.setRestRequestBody(requestBody);
+        mockService.setProjectId(projectId);
+        mockServiceRepository.save(mockService);
+    }
+
+    private String mockResponseTemplate(RestMethod method) {
+        // Fetches the example JSON data from the first mock response if available, defaults to "{}"
+        return method.getMockResponses().isEmpty() ? "{}" : method.getMockResponses().get(0).getBody();
+    }
+
+    private String requestBody(RestMethod method) {
+        // Fetches the example JSON data from the request body if available, defaults to "{}"
+        return method.getRequestBody() != null && method.getRequestBody().getExample() != null
+                ? method.getRequestBody().getExample()
+                : "{}";
+    }
+
+
+    private void saveStaticResponse(String projectId, RestMethod method, String resourceUri, String responseBody) {
+        RestMockResponse mockResponse = RestMockResponse.builder()
+                .id(IdUtility.generateId())
+                .projectId(projectId)
+                .applicationId(method.getResource().getAppId())
+                .linkedResourceId(method.getResourceId())
+                .name(resourceUri)
+                .path(resourceUri)
+                .httpMethod(method.getHttpMethod())
+                .body(responseBody != null ? responseBody : "{}")
+                .httpStatusCode(200)
+                .httpHeaders(List.of(new HttpHeader("Content-Type", "application/json")))
+                .build();
+
+        mockResponseRepository.save(mockResponse);
+    }
+
     public void processFileFromURL(String fileUrl, RestDefinitionType type, String projectId) {
         try {
             logger.info("Processing file from URL: {}, type: {}, projectId: {}", fileUrl, type, projectId);
@@ -78,54 +183,9 @@ public class MockServiceManager {
         }
     }
 
-    // Core file processing logic for all file types
-    private void processFile(File file, RestDefinitionType type, String projectId) {
-        try {
-            logger.info("Processing file for projectId: {}, type: {}", projectId, type);
-
-            List<RestApplication> applications = switch (type) {
-                case RAML -> ramlRestDefinitionConverter.convert(file, projectId, true);
-                case OPENAPI -> openApiRestDefinitionConverter.convert(file, projectId, true);
-                case SWAGGER -> swaggerRestDefinitionConverter.convert(file, projectId, true);
-                case WADL -> wadlRestDefinitionConverter.convert(file, projectId, true);
-                default -> throw new IllegalArgumentException("Unsupported API type: " + type);
-            };
-
-            saveGeneratedMocks(applications);
-        } catch (Exception e) {
-            logger.error("Error processing file: {}", e.getMessage(), e);
-        }
-    }
-
-    // Save generated applications and their related entities
-    private void saveGeneratedMocks(List<RestApplication> applications) {
-        applications.forEach(app -> {
-            restApplicationRepository.save(app);  // Save RestApplication
-            logger.info("Saved RestApplication with ID: {}", app.getId());
-
-            app.getResources().forEach(resource -> {
-                restResourceRepository.save(resource);  // Save RestResource
-                logger.info("Saved RestResource with ID: {}", resource.getId());
-
-                resource.getMethods().forEach(method -> {
-                    restMethodRepository.save(method);  // Save RestMethod
-                    logger.info("Saved RestMethod with ID: {}", method.getId());
-
-                    if (!method.getMockResponses().isEmpty()) {
-                        mockResponseRepository.saveAll(method.getMockResponses());  // Save RestMockResponses
-                        logger.info("Saved {} mock responses for method {}", method.getMockResponses().size(), method.getName());
-                    }
-                });
-            });
-        });
-    }
-
-    // Retrieve mock responses based on various parameters
     public List<RestMockResponse> getMockResponses(String projectId, String applicationId, String resourceId) {
-        logger.info("Fetching mock responses for projectId: {}, applicationId: {}, resourceId: {}", projectId, applicationId, resourceId);
-
         if (resourceId != null && applicationId != null) {
-            return mockResponseRepository.findByLinkedResourceIdAndApplicationIdAndProjectId(resourceId, applicationId, projectId);
+            return mockResponseRepository.findByProjectIdAndApplicationIdAndResourceId(projectId, applicationId, resourceId);
         } else if (applicationId != null) {
             return mockResponseRepository.findByApplicationIdAndProjectId(applicationId, projectId);
         } else {

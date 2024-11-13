@@ -3,18 +3,14 @@ package com.mock.application.Service.converter.openapi;
 import com.mock.application.Model.*;
 import com.mock.application.Model.core.HttpHeader;
 import com.mock.application.Model.core.utility.IdUtility;
-import com.mock.application.Service.RestResponseService;
 import com.mock.application.Service.converter.RestDefinitionConverter;
-import io.swagger.parser.OpenAPIParser;
+import io.swagger.models.*;
+import io.swagger.parser.SwaggerParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.responses.ApiResponse;
-import io.swagger.v3.oas.models.responses.ApiResponses;
-import io.swagger.v3.parser.core.models.ParseOptions;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,29 +21,21 @@ import java.util.Map;
 
 @Service
 public class OpenApiRestDefinitionConverter implements RestDefinitionConverter {
-    private static final Logger log = LoggerFactory.getLogger(OpenApiRestDefinitionConverter.class);
-
-    private final RestResponseService restResponseService;
 
     @Autowired
-    public OpenApiRestDefinitionConverter(RestResponseService restResponseService) {
-        this.restResponseService = restResponseService;
+    public OpenApiRestDefinitionConverter() {
+        // Default constructor
     }
 
-    public List<RestApplication> convertOpenApiFile(File file, String projectId, boolean generateResponse) {
-        ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setResolve(true);
-        parseOptions.setResolveFully(true);
-
-        SwaggerParseResult result = new OpenAPIParser().readLocation(file.getAbsolutePath(), null, parseOptions);
+    public List<RestApplication> convertSwaggerFile(File file, String projectId, boolean generateResponse) {
+        SwaggerParseResult result = new OpenAPIV3Parser().readLocation(file.getAbsolutePath(), null, null);
         OpenAPI openAPI = result.getOpenAPI();
 
         if (openAPI == null) {
-            throw new IllegalArgumentException("Unable to parse the OpenAPI content.");
+            throw new IllegalArgumentException("Unable to parse the OpenAPI 3.0 file.");
         }
 
-        RestApplication restApplication = convertOpenApi(openAPI, projectId, generateResponse);
-        return List.of(restApplication);
+        return List.of(convertOpenApi(openAPI, projectId, generateResponse));
     }
 
     private RestApplication convertOpenApi(OpenAPI openAPI, String projectId, boolean generateResponse) {
@@ -56,21 +44,16 @@ public class OpenApiRestDefinitionConverter implements RestDefinitionConverter {
 
         for (Map.Entry<String, PathItem> pathEntry : openAPI.getPaths().entrySet()) {
             String resourceName = pathEntry.getKey();
-            PathItem resourcePath = pathEntry.getValue();
+            PathItem pathItem = pathEntry.getValue();
             String resourceId = IdUtility.generateId();
             List<RestMethod> methods = new ArrayList<>();
 
-            if (resourcePath.getGet() != null) {
-                methods.add(createRestMethod(resourcePath.getGet(), "GET", resourceId, generateResponse));
-            }
-            if (resourcePath.getPost() != null) {
-                methods.add(createRestMethod(resourcePath.getPost(), "POST", resourceId, generateResponse));
-            }
-            if (resourcePath.getPut() != null) {
-                methods.add(createRestMethod(resourcePath.getPut(), "PUT", resourceId, generateResponse));
-            }
-            if (resourcePath.getDelete() != null) {
-                methods.add(createRestMethod(resourcePath.getDelete(), "DELETE", resourceId, generateResponse));
+            for (PathItem.HttpMethod httpMethod : PathItem.HttpMethod.values()) {
+                Operation operation = pathItem.readOperationsMap().get(httpMethod);
+                if (operation != null) {
+                    RestMethod restMethod = createRestMethod(operation, httpMethod.name(), resourceId, resourceName, generateResponse);
+                    methods.add(restMethod);
+                }
             }
 
             resources.add(RestResource.builder()
@@ -90,63 +73,104 @@ public class OpenApiRestDefinitionConverter implements RestDefinitionConverter {
                 .build();
     }
 
-    private RestMethod createRestMethod(Operation operation, String httpMethod, String resourceId, boolean generateResponse) {
+    private RestMethod createRestMethod(Operation operation, String httpMethod, String resourceId, String resourceUri, boolean generateResponse) {
         String methodId = IdUtility.generateId();
 
+        List<RestMockResponse> mockResponses = new ArrayList<>();
         RestMethod restMethod = RestMethod.builder()
                 .id(methodId)
                 .resourceId(resourceId)
-                .name(operation.getOperationId() != null ? operation.getOperationId() : httpMethod)
+                .name(operation.getSummary() != null ? operation.getSummary() : httpMethod)
                 .httpMethod(httpMethod)
                 .status(RestMockResponseStatus.ENABLED)
                 .build();
 
-        List<RestMockResponse> mockResponses = new ArrayList<>();
-
-        if (generateResponse) {
-            ApiResponses apiResponses = operation.getResponses();
-            if (apiResponses != null) {
-                for (Map.Entry<String, ApiResponse> entry : apiResponses.entrySet()) {
-                    RestMockResponse mockResponse = generateMockResponse(entry.getKey(), entry.getValue(), restMethod);
-                    mockResponses.add(mockResponse);
+        // Set requestBody example if available
+        RequestBody requestBody = new RequestBody();
+        if (operation.getRequestBody() != null && operation.getRequestBody().getContent() != null) {
+            operation.getRequestBody().getContent().forEach((mediaType, content) -> {
+                if (content.getExample() != null) {
+                    requestBody.setExample(content.getExample().toString());
+                } else if (content.getExamples() != null && !content.getExamples().isEmpty()) {
+                    requestBody.setExample(content.getExamples().values().iterator().next().getValue().toString());
                 }
+            });
+        }
+        restMethod.setRequestBody(requestBody);
+
+        if (generateResponse && operation.getResponses() != null) {
+            for (Map.Entry<String, io.swagger.v3.oas.models.responses.ApiResponse> entry : operation.getResponses().entrySet()) {
+                RestMockResponse mockResponse = generateMockResponse(entry.getKey(), entry.getValue(), httpMethod, resourceUri, resourceId);
+                mockResponses.add(mockResponse);
             }
         }
 
-        restMethod = RestMethod.builder()
-                .id(restMethod.getId())
-                .resourceId(restMethod.getResourceId())
+        return RestMethod.builder()
+                .id(methodId)
+                .resourceId(resourceId)
                 .name(restMethod.getName())
-                .httpMethod(restMethod.getHttpMethod())
+                .httpMethod(httpMethod)
                 .status(restMethod.getStatus())
+                .requestBody(requestBody) // Set the requestBody in the builder
                 .mockResponses(mockResponses)
                 .build();
-
-        return restMethod;
     }
-    private RestMockResponse generateMockResponse(String responseCode, ApiResponse apiResponse, RestMethod method) {
+
+    private RestMockResponse generateMockResponse(String responseCode, io.swagger.v3.oas.models.responses.ApiResponse apiResponse, String httpMethod, String resourceUri, String resourceId) {
         int httpStatusCode = responseCode != null ? Integer.parseInt(responseCode) : 200;
 
         List<HttpHeader> headers = new ArrayList<>();
         if (apiResponse.getHeaders() != null) {
             apiResponse.getHeaders().forEach((key, header) -> {
-                String headerValue = header.getSchema() != null && header.getSchema().getExample() != null
+                String headerValue = (header.getSchema() != null && header.getSchema().getExample() != null)
                         ? header.getSchema().getExample().toString()
-                        : "";
+                        : "application/json";
                 headers.add(HttpHeader.builder().name(key).value(headerValue).build());
             });
         }
 
+        String responseBody = apiResponse.getDescription() != null ? apiResponse.getDescription() : "{}";
+
         return RestMockResponse.builder()
-                .method(method) // Set the method reference directly
+                .resourceId(resourceId)
                 .httpStatusCode(httpStatusCode)
                 .httpHeaders(headers)
-                .body(apiResponse.getDescription())
+                .path(resourceUri)
+                .name(resourceUri)
+                .httpMethod(httpMethod)
+                .body(responseBody)
                 .build();
     }
 
     @Override
     public List<RestApplication> convert(File file, String projectId, boolean generateResponse) {
-        return convertOpenApiFile(file, projectId, generateResponse);
+        return convertSwaggerFile(file, projectId, generateResponse);
+    }
+
+    @Override
+    public List<EndpointDefinition> convertToEndpointDefinitions(File file, String projectId) {
+        List<EndpointDefinition> endpoints = new ArrayList<>();
+        Swagger swagger = new SwaggerParser().read(file.getAbsolutePath());
+
+        if (swagger == null) {
+            throw new IllegalStateException("Unable to parse the Swagger file.");
+        }
+
+        swagger.getPaths().forEach((path, pathItem) -> {
+            pathItem.getOperationMap().forEach((httpMethod, operation) -> {
+                String mockResponse = "{}";
+                Response response = operation.getResponses().get("200");
+                if (response != null && response.getExamples() != null) {
+                    mockResponse = response.getExamples().values().stream()
+                            .findFirst()
+                            .map(Object::toString)
+                            .orElse("{}");
+                }
+
+                endpoints.add(new EndpointDefinition(projectId, path, httpMethod.toString(), mockResponse));
+            });
+        });
+
+        return endpoints;
     }
 }

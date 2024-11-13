@@ -11,6 +11,7 @@ import java.util.List;
 public interface MockResponseRepository extends JpaRepository<RestMockResponse, String> {
     List<RestMockResponse> findByMethodId(String  methodId);
     List<RestMockResponse> findByStatus(RestMockResponseStatus status);
+    List<RestMockResponse> findByProjectIdAndApplicationIdAndResourceId(String projectId, String applicationId, String resourceId);
 
     // Custom query methods to find responses based on various IDs
     List<RestMockResponse> findByProjectId(String projectId);

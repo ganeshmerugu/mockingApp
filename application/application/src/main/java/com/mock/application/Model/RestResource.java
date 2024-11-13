@@ -18,11 +18,19 @@ public class RestResource {
     private String name;
     private String uri;
 
+    public String getAppId() {
+        return appId;
+    }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
+
     @ManyToOne
     @JoinColumn(name = "application_id", referencedColumnName = "id", insertable = false, updatable = false)
     private RestApplication application;
 
-    @OneToMany(mappedBy = "resource", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "resource", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RestMethod> methods = new ArrayList<>();
 
     public RestApplication getApplication() {
@@ -127,6 +135,8 @@ public class RestResource {
     }
 
     public void setMethods(List<RestMethod> methods) {
-        this.methods = methods;
-    }
-}
+        this.methods.clear();
+        if (methods != null) {
+            this.methods.addAll(methods);
+        }
+    }}

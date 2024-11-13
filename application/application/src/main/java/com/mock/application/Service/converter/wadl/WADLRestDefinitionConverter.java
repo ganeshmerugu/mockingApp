@@ -1,6 +1,7 @@
 package com.mock.application.Service.converter.wadl;
 
 import com.mock.application.Model.*;
+import com.mock.application.Model.core.HttpHeader;
 import com.mock.application.Model.core.utility.IdUtility;
 import com.mock.application.Service.RestResponseService;
 import com.mock.application.Service.converter.RestDefinitionConverter;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -80,18 +82,22 @@ public class WADLRestDefinitionConverter implements RestDefinitionConverter {
 
         for (int i = 0; i < methodNodes.getLength(); i++) {
             Element methodElement = (Element) methodNodes.item(i);
-            String methodName = methodElement.getAttribute("id");
+            String methodName = methodElement.getAttribute("name");
             String httpMethod = methodElement.getAttribute("name");
 
-            List<RestMockResponse> mockResponses = generateResponse ? generateMockResponses(methodElement) : new ArrayList<>();
+            // Extract the request body, if available
+            RequestBody requestBody = parseRequestBody(methodElement);
+
+            List<RestMockResponse> mockResponses = generateResponse ? generateMockResponses(methodElement, resourceId, methodName, httpMethod) : new ArrayList<>();
 
             RestMethod restMethod = RestMethod.builder()
                     .id(IdUtility.generateId())
                     .resourceId(resourceId)
-                    .name(methodName)
+                    .name(methodName != null ? methodName : httpMethod)
                     .httpMethod(httpMethod)
                     .status(RestMockResponseStatus.ENABLED)
                     .mockResponses(mockResponses)
+                    .requestBody(requestBody) // Set the parsed request body
                     .build();
 
             methods.add(restMethod);
@@ -99,29 +105,130 @@ public class WADLRestDefinitionConverter implements RestDefinitionConverter {
         return methods;
     }
 
-    private List<RestMockResponse> generateMockResponses(Element methodElement) {
+    private RequestBody parseRequestBody(Element methodElement) {
+        NodeList requestNodes = methodElement.getElementsByTagName("request");
+        if (requestNodes.getLength() == 0) {
+            return null; // No request body found
+        }
+
+        Element requestElement = (Element) requestNodes.item(0);
+        NodeList representationNodes = requestElement.getElementsByTagName("representation");
+
+        String exampleContent = "{}"; // Default to empty JSON if no content
+        if (representationNodes.getLength() > 0) {
+            Element representationElement = (Element) representationNodes.item(0);
+            String mediaType = representationElement.getAttribute("mediaType");
+            exampleContent = "{ \"example\": \"Example content for " + mediaType + "\" }"; // Custom example
+
+            if (representationElement.getTextContent() != null && !representationElement.getTextContent().isBlank()) {
+                exampleContent = representationElement.getTextContent();
+            }
+        }
+
+        return new RequestBody(exampleContent); // Create RequestBody with the parsed example content
+    }
+
+
+
+    private List<RestMockResponse> generateMockResponses(Element methodElement, String resourceId, String methodName, String httpMethod) {
         List<RestMockResponse> mockResponses = new ArrayList<>();
         NodeList responseNodes = methodElement.getElementsByTagName("response");
 
         for (int i = 0; i < responseNodes.getLength(); i++) {
             Element responseElement = (Element) responseNodes.item(i);
-            String statusCode = responseElement.getAttribute("status");
-            String body = ""; // Initialize with default or specific body content if needed
+            String responseCode = responseElement.getAttribute("status");
 
-            RestMockResponse mockResponse = RestMockResponse.builder()
-                    .httpStatusCode(Integer.parseInt(statusCode))
-                    .body(body)
-                    .status(RestMockResponseStatus.ENABLED)
-                    .build();
-
-            restResponseService.saveResponse(mockResponse, body);
+            RestMockResponse mockResponse = generateMockResponse(responseCode, responseElement, resourceId, methodName, httpMethod);
             mockResponses.add(mockResponse);
         }
         return mockResponses;
     }
 
+    private RestMockResponse generateMockResponse(String responseCode, Element responseElement, String resourceId, String methodName, String httpMethod) {
+        int httpStatusCode = responseCode != null ? Integer.parseInt(responseCode) : 200;
+
+        // Process headers from the response element
+        List<HttpHeader> headers = new ArrayList<>();
+        NodeList headerNodes = responseElement.getElementsByTagName("param");
+        for (int j = 0; j < headerNodes.getLength(); j++) {
+            Element headerElement = (Element) headerNodes.item(j);
+            String headerName = headerElement.getAttribute("name");
+            String headerValue = headerElement.getAttribute("default") != null ? headerElement.getAttribute("default") : "application/json";
+            headers.add(HttpHeader.builder().name(headerName).value(headerValue).build());
+        }
+
+        // Process the body content
+        String responseBody = "{}";
+        NodeList representationNodes = responseElement.getElementsByTagName("representation");
+        if (representationNodes.getLength() > 0) {
+            Element representationElement = (Element) representationNodes.item(0);
+            responseBody = representationElement.getTextContent();
+        }
+
+        return RestMockResponse.builder()
+                .id(IdUtility.generateId())
+                .path(resourceId) // Set path based on resourceId
+                .name(methodName != null ? methodName : httpMethod)
+                .httpMethod(httpMethod)
+                .linkedResourceId(resourceId)
+                .httpStatusCode(httpStatusCode)
+                .httpHeaders(headers)
+                .body(responseBody)
+                .build();
+    }
+
     @Override
     public List<RestApplication> convert(File file, String projectId, boolean generateResponse) {
         return convertWADLFile(file, projectId, generateResponse);
+    }
+
+    @Override
+    public List<EndpointDefinition> convertToEndpointDefinitions(File file, String projectId) {
+        List<EndpointDefinition> endpoints = new ArrayList<>();
+
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(file);
+
+            document.getDocumentElement().normalize();
+
+            NodeList resourceNodes = document.getElementsByTagName("resource");
+            for (int i = 0; i < resourceNodes.getLength(); i++) {
+                Node resourceNode = resourceNodes.item(i);
+                if (resourceNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element resourceElement = (Element) resourceNode;
+                    String path = resourceElement.getAttribute("path");
+
+                    NodeList methodNodes = resourceElement.getElementsByTagName("method");
+                    for (int j = 0; j < methodNodes.getLength(); j++) {
+                        Node methodNode = methodNodes.item(j);
+                        if (methodNode.getNodeType() == Node.ELEMENT_NODE) {
+                            Element methodElement = (Element) methodNode;
+                            String httpMethod = methodElement.getAttribute("name");
+
+                            String mockResponse = "{}";  // Default mock response
+                            NodeList responseNodes = methodElement.getElementsByTagName("response");
+                            if (responseNodes.getLength() > 0) {
+                                Element responseElement = (Element) responseNodes.item(0);
+                                NodeList representationNodes = responseElement.getElementsByTagName("representation");
+                                if (representationNodes.getLength() > 0) {
+                                    Element representationElement = (Element) representationNodes.item(0);
+                                    mockResponse = representationElement.getTextContent();
+                                }
+                            }
+
+                            endpoints.add(new EndpointDefinition(projectId, path, httpMethod, mockResponse));
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Failed to parse WADL file", e);
+        }
+
+        return endpoints;
     }
 }

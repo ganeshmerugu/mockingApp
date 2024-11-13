@@ -3,28 +3,28 @@ package com.mock.application.Model.core;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
-
 public class HttpHeader {
-    private  String name ="";
-    private String value="";
+
+    private String name;
+    private String value;
 
     // Default constructor for JPA
-    public HttpHeader() {}
+    public HttpHeader() {
+        // Set default values if necessary
+        this.name = "";
+        this.value = "";
+    }
 
-
-
-    // Constructor is private to enforce the use of builder
-    public HttpHeader(HttpHeaderBuilder builder) {
+    // Constructor for builder usage
+    private HttpHeader(HttpHeaderBuilder builder) {
         this.name = builder.name;
         this.value = builder.value;
     }
 
-    public HttpHeader(String name, String s, String name1, String value) {
-        this.name = name1;
-        this.value = value;
-    }
-
+    // Parameterized constructor for direct instantiation (if needed)
     public HttpHeader(String name, String value) {
+        this.name = name;
+        this.value = value;
     }
 
     // Getters
@@ -34,6 +34,15 @@ public class HttpHeader {
 
     public String getValue() {
         return value;
+    }
+
+    // Setters
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 
     // Static builder method

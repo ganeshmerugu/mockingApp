@@ -12,10 +12,19 @@ public class MockService {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String projectId;
 
     private String endpoint;
     private String method;
     private String mockResponseTemplate;
+
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
+    }
 
     // Additional fields
     private String originalEndpoint;

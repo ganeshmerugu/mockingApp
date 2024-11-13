@@ -19,7 +19,7 @@ public final class RestDefinitionConverterFactory {
             case SWAGGER:
                 return new SwaggerRestDefinitionConverter(restResponseService);
             case OPENAPI:
-                return new OpenApiRestDefinitionConverter(restResponseService);
+                return new OpenApiRestDefinitionConverter();
             case RAML:
                 return new RAMLRestDefinitionConverter(restResponseService);
             default:

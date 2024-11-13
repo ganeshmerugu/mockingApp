@@ -22,11 +22,65 @@ paths:
       parameters:
         - in: body
           name: user
+          description: User object to be created
+          required: true
           schema:
             $ref: '#/definitions/User'
       responses:
         201:
-          description: User created
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/User'
+  /users/{userId}:
+    get:
+      summary: Get a user by ID
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          type: integer
+          description: ID of the user to retrieve
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/User'
+        404:
+          description: User not found
+    put:
+      summary: Update an existing user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          type: integer
+          description: ID of the user to update
+        - in: body
+          name: user
+          description: Updated user object
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        200:
+          description: User updated successfully
+          schema:
+            $ref: '#/definitions/User'
+        404:
+          description: User not found
+    delete:
+      summary: Delete a user by ID
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          type: integer
+          description: ID of the user to delete
+      responses:
+        204:
+          description: User deleted successfully
+        404:
+          description: User not found
 definitions:
   User:
     type: object

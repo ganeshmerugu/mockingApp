@@ -10,8 +10,10 @@ public class RestApplication {
     @Id
     private String id = UUID.randomUUID().toString();  // Use UUID string for id
 
+
     private String projectId;
     private String name;
+
 
     @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RestResource> resources;

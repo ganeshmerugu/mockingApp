@@ -2,9 +2,13 @@ package com.mock.application.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mock.application.Model.RestMockResponse;
+import com.mock.application.Model.RestMockResponseStatus;
 import com.mock.application.Repository.MockResponseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RestResponseService {
@@ -27,13 +31,13 @@ public class RestResponseService {
             // Create a new RestMockResponse instance with the updated body using the builder
             RestMockResponse responseWithBody = RestMockResponse.builder()
                     .id(originalResponse.getId()) // Retain the original ID
-                    .projectId(originalResponse.getProjectId())
-                    .applicationId(originalResponse.getApplicationId())
-                    .linkedResourceId(originalResponse.getLinkedResourceId())
-                    .name(originalResponse.getName())
-                    .httpStatusCode(originalResponse.getHttpStatusCode())
-                    .status(originalResponse.getStatus())
-                    .httpHeaders(originalResponse.getHttpHeaders())
+                    .projectId(Optional.ofNullable(originalResponse.getProjectId()).orElse("defaultProjectId"))
+                    .applicationId(Optional.ofNullable(originalResponse.getApplicationId()).orElse("defaultApplicationId"))
+                    .linkedResourceId(Optional.ofNullable(originalResponse.getLinkedResourceId()).orElse("defaultResourceId"))
+                    .name(Optional.ofNullable(originalResponse.getName()).orElse("defaultName"))
+                    .httpStatusCode(Optional.ofNullable(originalResponse.getHttpStatusCode()).orElse(200))
+                    .status(Optional.ofNullable(originalResponse.getStatus()).orElse(RestMockResponseStatus.ENABLED))
+                    .httpHeaders(Optional.ofNullable(originalResponse.getHttpHeaders()).orElse(List.of()))
                     .body(jsonBody) // Set the new JSON body
                     .build();
 
@@ -43,6 +47,5 @@ public class RestResponseService {
             System.err.println("Error serializing response body to JSON: " + e.getMessage());
         }
     }
-
     // Additional methods for retrieving or processing responses can be added here
 }

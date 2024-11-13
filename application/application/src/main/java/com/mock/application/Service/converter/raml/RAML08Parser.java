@@ -53,18 +53,21 @@ public class RAML08Parser extends AbstractRAMLParser {
     protected List<RestMockResponse> createMockResponses(List<org.raml.v2.api.model.v08.bodies.Response> responses) {
         List<RestMockResponse> mockResponses = new ArrayList<>();
         for (org.raml.v2.api.model.v08.bodies.Response response : responses) {
-            String responseCode = response.code().value();
-            int httpStatusCode = parseStatusCode(responseCode);
-            RestMockResponseStatus status = getStatusBasedOnCode(httpStatusCode);
+            int httpStatusCode = parseStatusCode(response.code().value());
+            String description = response.description() != null ? response.description().value() : "{}";
 
-            String body = getBodyContentV08(response);
-            List<HttpHeader> headers = getHeadersV08(response);
+            List<HttpHeader> headers = new ArrayList<>();
+            if (response.headers() != null) {
+                for (var header : response.headers()) {
+                    String headerValue = header.example() != null ? header.example().toString() : "application/json";
+                    headers.add(HttpHeader.builder().name(header.name()).value(headerValue).build());
+                }
+            }
 
             RestMockResponse mockResponse = RestMockResponse.builder()
                     .httpStatusCode(httpStatusCode)
-                    .body(body)
-                    .status(status)
                     .httpHeaders(headers)
+                    .body(description)
                     .build();
 
             mockResponses.add(mockResponse);
