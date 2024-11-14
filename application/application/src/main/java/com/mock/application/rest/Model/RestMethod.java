@@ -23,7 +23,7 @@ public class RestMethod {
 
     @ManyToOne
     @JoinColumn(name = "resource_id", referencedColumnName = "id", insertable = false, updatable = false)
-    private RestResource resource;
+    private RestResource resource;  // FK to RestResource
 
     @OneToMany(mappedBy = "method", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RestMockResponse> mockResponses = new ArrayList<>();

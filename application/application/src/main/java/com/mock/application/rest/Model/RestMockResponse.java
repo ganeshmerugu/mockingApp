@@ -35,9 +35,10 @@ public class RestMockResponse {
     @Enumerated(EnumType.STRING)
     private RestMockResponseStatus status;
 
+    // ElementCollection on HttpHeader with foreign key dependency
     @ElementCollection
     @CollectionTable(name = "http_headers", joinColumns = @JoinColumn(name = "response_id"))
-    private List<HttpHeader> httpHeaders;
+    private List<HttpHeader> httpHeaders;;
 
     public String getId() {
         return id;

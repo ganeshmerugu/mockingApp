@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -93,43 +94,38 @@ public class MockServiceManager {
     @Transactional
     private void saveGeneratedMocks(List<RestApplication> applications, String projectId) {
         applications.forEach(app -> {
-            // Step 1: Set projectId and save the RestApplication, ensuring the ID is generated and flushed
             app.setProjectId(projectId);
-            RestApplication savedApp = restApplicationRepository.saveAndFlush(app); // save and flush to ensure ID generation
+            RestApplication savedApp = restApplicationRepository.saveAndFlush(app); // Explicit flush
 
             for (RestResource resource : app.getResources()) {
-                // Step 2: Set the application ID in the RestResource to the saved RestApplication's ID
                 resource.setAppId(savedApp.getId());
                 resource.setApplication(savedApp);
+                RestResource savedResource = restResourceRepository.saveAndFlush(resource); // Explicit flush
 
                 for (RestMethod method : resource.getMethods()) {
-                    method.setResource(resource); // Link RestMethod to RestResource
+                    method.setResource(savedResource);
+                    RestMethod savedMethod = restMethodRepository.saveAndFlush(method); // Explicit flush
 
                     for (RestMockResponse mockResponse : method.getMockResponses()) {
-                        // Assign foreign keys in RestMockResponse
                         mockResponse.setApplicationId(savedApp.getId());
-                        mockResponse.setLinkedResourceId(resource.getId());
-                        mockResponse.setMethod(method);
+                        mockResponse.setLinkedResourceId(savedResource.getId());
+                        mockResponse.setMethod(savedMethod);
                         mockResponse.setProjectId(projectId);
+
+                        // Embed httpHeaders in the RestMockResponse object
+                        List<HttpHeader> headers = new ArrayList<>();
+                        headers.add(new HttpHeader("Content-Type", "application/json"));
+                        mockResponse.setHttpHeaders(headers);
                     }
 
-                    mockResponseRepository.saveAll(method.getMockResponses());
-
-                    // Save a MockService entry for each method if needed
+                    mockResponseRepository.saveAll(method.getMockResponses()); // Bulk save after setting fields
                     createAndSaveMockService(resource.getUri(), method.getHttpMethod(), mockResponseTemplate(method), projectId, requestBody(method));
                 }
-
-                // Step 3: Save RestResource with assigned application ID and application reference
-                restResourceRepository.save(resource);
             }
 
-            // Finalize by saving the fully populated RestApplication with all nested data
-            restApplicationRepository.save(savedApp);
+            restApplicationRepository.save(savedApp); // Final save to update any nested relations
         });
     }
-
-
-
 
     private void createAndSaveMockService(String endpoint, String httpMethod, String mockResponseTemplate, String projectId, String requestBody) {
         MockService mockService = new MockService();
@@ -140,16 +136,14 @@ public class MockServiceManager {
         mockService.setResponseStrategy("default");
         mockService.setRestRequestBody(requestBody);
         mockService.setProjectId(projectId);
-        mockServiceRepository.save(mockService);
+        mockServiceRepository.save(mockService); // Ensure no foreign keys depend on other tables
     }
 
     private String mockResponseTemplate(RestMethod method) {
-        // Fetches the example JSON data from the first mock response if available, defaults to "{}"
         return method.getMockResponses().isEmpty() ? "{}" : method.getMockResponses().get(0).getBody();
     }
 
     private String requestBody(RestMethod method) {
-        // Fetches the example JSON data from the request body if available, defaults to "{}"
         return method.getRequestBody() != null && method.getRequestBody().getExample() != null
                 ? method.getRequestBody().getExample()
                 : "{}";
@@ -157,6 +151,9 @@ public class MockServiceManager {
 
 
     private void saveStaticResponse(String projectId, RestMethod method, String resourceUri, String responseBody) {
+        List<HttpHeader> headers = new ArrayList<>();
+        headers.add(new HttpHeader("Content-Type", "application/json")); // Ensure headers are set here
+
         RestMockResponse mockResponse = RestMockResponse.builder()
                 .id(IdUtility.generateId())
                 .projectId(projectId)
@@ -167,7 +164,7 @@ public class MockServiceManager {
                 .httpMethod(method.getHttpMethod())
                 .body(responseBody != null ? responseBody : "{}")
                 .httpStatusCode(200)
-                .httpHeaders(List.of(new HttpHeader("Content-Type", "application/json")))
+                .httpHeaders(headers)  // Add headers here
                 .build();
 
         mockResponseRepository.save(mockResponse);
