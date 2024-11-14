@@ -1,6 +1,5 @@
 package com.mock.application.rest.Controller;
 
-
 import com.mock.application.rest.Model.RestMockResponse;
 import com.mock.application.rest.Service.MockResponseService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,11 +30,11 @@ public class StaticApiController {
         String httpMethod = request.getMethod();
 
         Optional<RestMockResponse> responseOpt = mockResponseService.findMockResponse(projectId, path, httpMethod);
+
         return responseOpt
                 .map(response -> ResponseEntity.status(response.getHttpStatusCode())
                         .headers(headers -> response.getHttpHeaders().forEach(header -> headers.add(header.getName(), header.getValue())))
-                        .body(response.getBody()))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Endpoint not found."));
+                        .body(mockResponseService.generateCompleteJsonResponse(response)))  // Return the full JSON response
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Endpoint not found.\"}"));
     }
-
 }

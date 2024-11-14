@@ -1,7 +1,5 @@
 package com.mock.application.rest.Service;
 
-
-
 import com.mock.application.rest.Model.*;
 import com.mock.application.rest.Model.core.HttpHeader;
 import com.mock.application.rest.Model.core.utility.IdUtility;
@@ -119,7 +117,7 @@ public class MockServiceManager {
                     }
 
                     mockResponseRepository.saveAll(method.getMockResponses()); // Bulk save after setting fields
-                    createAndSaveMockService(resource.getUri(), method.getHttpMethod(), mockResponseTemplate(method), projectId, requestBody(method));
+                    createAndSaveMockService(resource.getUri(), method.getHttpMethod(), mockResponseTemplate(method), projectId, savedMethod);
                 }
             }
 
@@ -127,16 +125,20 @@ public class MockServiceManager {
         });
     }
 
-    private void createAndSaveMockService(String endpoint, String httpMethod, String mockResponseTemplate, String projectId, String requestBody) {
+    private void createAndSaveMockService(String endpoint, String httpMethod, String mockResponseTemplate, String projectId, RestMethod method) {
         MockService mockService = new MockService();
         mockService.setEndpoint(endpoint);
         mockService.setMethod(httpMethod);
         mockService.setMockResponseTemplate(mockResponseTemplate);
         mockService.setOriginalEndpoint(endpoint);
         mockService.setResponseStrategy("default");
-        mockService.setRestRequestBody(requestBody);
+
+        // Set the request body example if it exists
+        String requestBodyContent = method.getRequestBody() != null ? method.getRequestBody().getExample() : "{}";
+        mockService.setRestRequestBody(requestBodyContent);
+
         mockService.setProjectId(projectId);
-        mockServiceRepository.save(mockService); // Ensure no foreign keys depend on other tables
+        mockServiceRepository.save(mockService); // Save to the database
     }
 
     private String mockResponseTemplate(RestMethod method) {
@@ -148,7 +150,6 @@ public class MockServiceManager {
                 ? method.getRequestBody().getExample()
                 : "{}";
     }
-
 
     private void saveStaticResponse(String projectId, RestMethod method, String resourceUri, String responseBody) {
         List<HttpHeader> headers = new ArrayList<>();

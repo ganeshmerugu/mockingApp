@@ -1,6 +1,5 @@
 package com.mock.application.rest.Service;
 
-
 import com.mock.application.rest.Model.EndpointDefinition;
 import com.mock.application.rest.Model.RestMockResponse;
 import com.mock.application.rest.Model.core.HttpHeader;
@@ -50,5 +49,11 @@ public class MockResponseService {
                 .build();
 
         restMockResponseRepository.save(mockResponse);
+    }
+
+    // New method to retrieve complete JSON response
+    public String generateCompleteJsonResponse(RestMockResponse mockResponse) {
+        // If the mockResponse body is not empty, return it as JSON
+        return mockResponse.getBody() != null && !mockResponse.getBody().isEmpty() ? mockResponse.getBody() : "{\"message\": \"No example data available\"}";
     }
 }
