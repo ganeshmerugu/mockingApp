@@ -23,11 +23,11 @@ public class DynamicApiController {
     }
 
     @RequestMapping(value = "/{projectId}/**", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
-    public ResponseEntity<?> handleDynamicRequest(@PathVariable String projectId, HttpServletRequest request) {
+    public ResponseEntity<?> handleDynamicRequest(@PathVariable String projectId, HttpServletRequest request,@RequestBody(required = false)  String requestBody) {
         String path = request.getRequestURI().substring(("/dynamic/" + projectId).length()).trim();
         String httpMethod = request.getMethod();
 
-        Optional<RestMockResponse> responseOpt = mockResponseService.findMockResponse(projectId, path, httpMethod);
+        Optional<RestMockResponse> responseOpt = mockResponseService.findMockResponse(projectId, path, httpMethod,requestBody);
         return responseOpt
                 .map(response -> ResponseEntity.status(response.getHttpStatusCode())
                         .headers(headers -> response.getHttpHeaders().forEach(header -> headers.add(header.getName(), header.getValue())))

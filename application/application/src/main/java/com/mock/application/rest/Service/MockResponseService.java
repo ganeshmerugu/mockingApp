@@ -4,6 +4,8 @@ import com.mock.application.rest.Model.EndpointDefinition;
 import com.mock.application.rest.Model.RestMockResponse;
 import com.mock.application.rest.Model.core.HttpHeader;
 import com.mock.application.rest.Repository.RestMockResponseRepository;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +24,104 @@ public class MockResponseService {
         this.restMockResponseRepository = restMockResponseRepository;
     }
 
-    public Optional<RestMockResponse> findMockResponse(String projectId, String path, String httpMethod) {
-        return restMockResponseRepository.findByProjectIdAndPathAndHttpMethod(projectId, path, httpMethod);
+    public Optional<RestMockResponse> findMockResponse(String projectId, String path, String httpMethod, String requestBody) {
+        List<RestMockResponse> responses = restMockResponseRepository.findAllByProjectIdAndPathAndHttpMethod(projectId, path, httpMethod);
+
+        if (responses.isEmpty()) {
+            return Optional.empty(); // No responses defined for this endpoint
+        }
+
+        // Look for a response with HTTP status code 200
+        Optional<RestMockResponse> validResponse = responses.stream()
+                .filter(response -> response.getHttpStatusCode() == 200)
+                .findFirst();
+
+        if (validResponse.isPresent()) {
+            RestMockResponse response = validResponse.get();
+
+            if (requestBody != null && !requestBody.isEmpty()) {
+                try {
+                    JSONObject requestJson = new JSONObject(requestBody);
+                    JSONObject storedJson = new JSONObject(response.getBody());
+
+                    // Validate JSON structure
+                    if (compareJsonStructure(storedJson, requestJson)) {
+                        return validResponse; // Structure matches, return response
+                    } else {
+                        throw new IllegalArgumentException("Request JSON structure does not match the expected structure.");
+                    }
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Invalid request body: " + e.getMessage());
+                }
+            }
+
+            return validResponse; // No request body to validate, return the response
+        }
+
+        // If no valid response is found, fallback to an error response
+        return responses.stream()
+                .filter(response -> response.getHttpStatusCode() >= 400)
+                .findFirst();
+    }
+
+    private boolean validateRequestBody(RestMockResponse response, String requestBody) {
+        try {
+            if (requestBody == null || requestBody.isEmpty()) {
+                return false; // No request body to validate
+            }
+
+            JSONObject storedJson = new JSONObject(response.getBody());
+            JSONObject requestJson = new JSONObject(requestBody);
+
+            return compareJsonStructure(storedJson, requestJson); // Validate JSON structure
+        } catch (Exception e) {
+            return false; // Invalid JSON or mismatch
+        }
+    }
+
+    private boolean compareJsonStructure(JSONObject expected, JSONObject actual) {
+        for (String key : expected.keySet()) {
+            if (!actual.has(key)) {
+                throw new IllegalArgumentException("Missing required key: " + key);
+            }
+
+            Object expectedValue = expected.get(key);
+            Object actualValue = actual.get(key);
+
+            if (expectedValue instanceof JSONObject && actualValue instanceof JSONObject) {
+                if (!compareJsonStructure((JSONObject) expectedValue, (JSONObject) actualValue)) {
+                    return false;
+                }
+            } else if (expectedValue instanceof JSONArray && actualValue instanceof JSONArray) {
+                if (!compareJsonArrayStructure((JSONArray) expectedValue, (JSONArray) actualValue)) {
+                    throw new IllegalArgumentException("Array structure mismatch for key: " + key);
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean compareJsonArrayStructure(JSONArray expected, JSONArray actual) {
+        if (expected.isEmpty() || actual.isEmpty()) {
+            return true; // Allow empty arrays
+        }
+
+        Object expectedElement = expected.get(0);
+        Object actualElement = actual.get(0);
+
+        if (expectedElement instanceof JSONObject && actualElement instanceof JSONObject) {
+            return compareJsonStructure((JSONObject) expectedElement, (JSONObject) actualElement);
+        }
+
+        return true; // Primitive types comparison
+    }
+
+
+
+    private Optional<RestMockResponse> fallbackToErrorResponse(List<RestMockResponse> responses) {
+        return responses.stream()
+                .filter(response -> response.getHttpStatusCode() >= 400)
+                .findFirst();
     }
 
     public List<String> listAllEndpoints() {
@@ -51,9 +149,7 @@ public class MockResponseService {
         restMockResponseRepository.save(mockResponse);
     }
 
-    // New method to retrieve complete JSON response
     public String generateCompleteJsonResponse(RestMockResponse mockResponse) {
-        // If the mockResponse body is not empty, return it as JSON
         return mockResponse.getBody() != null && !mockResponse.getBody().isEmpty() ? mockResponse.getBody() : "{\"message\": \"No example data available\"}";
     }
 }
