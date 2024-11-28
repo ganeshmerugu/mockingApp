@@ -1,0 +1,1356 @@
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+				  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+				  xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+				  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+				  xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+				  xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+				  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				  xmlns:tns="http://new.webservice.namespace"
+				  targetNamespace="http://new.webservice.namespace">
+	<wsdl:types>
+		<xs:schema targetNamespace="http://new.webservice.namespace" xmlns:tns="http://new.webservice.namespace">
+			<xs:element name="Application" type="tns:Application"/>
+			<xs:complexType name="Application">
+				<xs:sequence>
+					<xs:element ref="tns:MessageList" minOccurs="0"/>
+					<xs:element ref="tns:DecisionResponse" minOccurs="0"/>
+					<xs:element ref="tns:CreditRequest" minOccurs="0"/>
+					<xs:element ref="tns:ApplicationScoring" minOccurs="0"/>
+					<xs:element ref="tns:ProcessingHistory" minOccurs="0"/>
+					<xs:element ref="tns:UserDefinedField" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element ref="tns:DataMethodHistory" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="Solicitud">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Solicitante" maxOccurs="1">
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element name="ScoreBuroCredito" minOccurs="0">
+												<xs:complexType>
+													<xs:sequence>
+														<xs:element name="Encabezado" minOccurs="0" maxOccurs="1">
+															<xs:complexType>
+																<xs:attribute name="numeroControlConsulta" type="xs:string"/>
+															</xs:complexType>
+														</xs:element>
+														<xs:element name="Nombre" minOccurs="0" maxOccurs="1">
+															<xs:complexType>
+																<xs:attribute name="apellidoPaterno" type="xs:string"/>
+																<xs:attribute name="apellidoMaterno" type="xs:string"/>
+																<xs:attribute name="apellidoAdicional" type="xs:string"/>
+																<xs:attribute name="primerNombre" type="xs:string"/>
+																<xs:attribute name="segundoNombre" type="xs:string"/>
+																<xs:attribute name="fechaNacimiento" type="xs:string"/>
+																<xs:attribute name="rfc" type="xs:string"/>
+																<xs:attribute name="numeroCedulaProfesional" type="xs:string"/>
+																<xs:attribute name="numeroRegistroElectoral" type="xs:string"/>
+																<xs:attribute name="numeroDependientes" type="xs:integer"/>
+															</xs:complexType>
+														</xs:element>
+														<xs:element name="Domicilios" minOccurs="0" maxOccurs="unbounded">
+															<xs:complexType>
+																<xs:attribute name="cp" type="xs:string"/>
+																<xs:attribute name="numeroTelefono" type="xs:string"/>
+																<xs:attribute name="fechaRegistroDireccion" type="xs:string"/>
+															</xs:complexType>
+														</xs:element>
+														<xs:element name="Empleos" minOccurs="0" maxOccurs="unbounded">
+															<xs:complexType>
+																<xs:attribute name="cp" type="xs:string"/>
+																<xs:attribute name="numeroTelefono" type="xs:string"/>
+																<xs:attribute name="salario" type="xs:double"/>
+																<xs:attribute name="baseSalarial" type="xs:double"/>
+																<xs:attribute name="fechaUltimoDiaEmpleo" type="xs:string"/>
+																<xs:attribute name="fechaReportoEmpleo" type="xs:string"/>
+																<xs:attribute name="fechaVerificacion" type="xs:string"/>
+															</xs:complexType>
+														</xs:element>
+														<xs:element name="Cuentas" minOccurs="0" maxOccurs="unbounded">
+															<xs:complexType>
+																<xs:attribute name="fechaActualizacion" type="xs:string"/>
+																<xs:attribute name="registroImpugnado" type="xs:string"/>
+																<xs:attribute name="claveOtorgante" type="xs:string"/>
+																<xs:attribute name="nombreOtorgante" type="xs:string"/>
+																<xs:attribute name="numeroTelefonoOtorgante" type="xs:string"/>
+																<xs:attribute name="identificadorSociedadCrediticia" type="xs:string"/>
+																<xs:attribute name="numeroCuentaActual" type="xs:string"/>
+																<xs:attribute name="indicadorTipoResponsabilidad" type="xs:string"/>
+																<xs:attribute name="tipoCuenta" type="xs:string"/>
+																<xs:attribute name="tipoContrato" type="xs:string"/>
+																<xs:attribute name="claveUnidadMonetaria" type="xs:string"/>
+																<xs:attribute name="valorActivoValucion" type="xs:double"/>
+																<xs:attribute name="numeroPagos" type="xs:integer"/>
+																<xs:attribute name="frecuenciaPagos" type="xs:string"/>
+																<xs:attribute name="montoPagar" type="xs:double"/>
+																<xs:attribute name="fechaAperturaCuenta" type="xs:string"/>
+																<xs:attribute name="fechaUltimoPago" type="xs:string"/>
+																<xs:attribute name="fechaUltimaCompra" type="xs:string"/>
+																<xs:attribute name="fechaCierreCuenta" type="xs:string"/>
+																<xs:attribute name="fechaReporte" type="xs:string"/>
+																<xs:attribute name="modoReportar" type="xs:string"/>
+																<xs:attribute name="ultimaFechaSaldoCero" type="xs:string"/>
+																<xs:attribute name="garantia" type="xs:string"/>
+																<xs:attribute name="creditoMaximo" type="xs:double"/>
+																<xs:attribute name="saldoActual" type="xs:double"/>
+																<xs:attribute name="limiteCredito" type="xs:double"/>
+																<xs:attribute name="saldoVencido" type="xs:double"/>
+																<xs:attribute name="numeroPagosVencidos" type="xs:integer"/>
+																<xs:attribute name="formaPagoActual" type="xs:string"/>
+																<xs:attribute name="historicoPagos" type="xs:string"/>
+																<xs:attribute name="fechaMasRecienteHistoricoPagos" type="xs:string"/>
+																<xs:attribute name="fechaMasAntiguaHistoricoPagos" type="xs:string"/>
+																<xs:attribute name="claveObservacion" type="xs:string"/>
+																<xs:attribute name="totalPagosReportados" type="xs:integer"/>
+																<xs:attribute name="totalPagosCalificadosMOP2" type="xs:double"/>
+																<xs:attribute name="totalPagosCalificadosMOP3" type="xs:double"/>
+																<xs:attribute name="totalPagosCalificadosMOP4" type="xs:double"/>
+																<xs:attribute name="totalPagosCalificadosMOP5" type="xs:double"/>
+																<xs:attribute name="importeSaldoMorosidadHistMasGrave" type="xs:double"/>
+																<xs:attribute name="fechaHistoricaMorosidadMasGrave" type="xs:string"/>
+																<xs:attribute name="mopHistoricoMorosidadMasGrave" type="xs:string"/>
+																<xs:attribute name="montoUltimoPago" type="xs:double"/>
+																<xs:attribute name="fechaInicioReestructura" type="xs:string"/>
+															</xs:complexType>
+														</xs:element>
+														<xs:element name="AlertaHawkC" minOccurs="0" maxOccurs="unbounded">
+															<xs:complexType>
+																<xs:attribute name="fechaReporte" type="xs:string"/>
+																<xs:attribute name="codigoClave" type="xs:string"/>
+																<xs:attribute name="tipoInstitucion" type="xs:string"/>
+																<xs:attribute name="mensaje" type="xs:string"/>
+															</xs:complexType>
+														</xs:element>
+														<xs:element name="AlertaHawkBD" minOccurs="0" maxOccurs="unbounded">
+															<xs:complexType>
+																<xs:attribute name="fechaReporte" type="xs:string"/>
+																<xs:attribute name="codigoClave" type="xs:string"/>
+																<xs:attribute name="tipoInstitucion" type="xs:string"/>
+																<xs:attribute name="mensaje" type="xs:string"/>
+															</xs:complexType>
+														</xs:element>
+														<xs:element name="ConsultaEfectuada" minOccurs="0" maxOccurs="unbounded">
+															<xs:complexType>
+																<xs:attribute name="fechaConsulta" type="xs:string"/>
+																<xs:attribute name="identificacionBuro" type="xs:string"/>
+																<xs:attribute name="claveOtorgante" type="xs:string"/>
+																<xs:attribute name="nombreOtorgante" type="xs:string"/>
+																<xs:attribute name="telefonoOtorgante" type="xs:string"/>
+																<xs:attribute name="tipoContrato" type="xs:string"/>
+																<xs:attribute name="claveUnidadMonetaria" type="xs:string"/>
+																<xs:attribute name="importeContrato" type="xs:double"/>
+																<xs:attribute name="indicadorTipoResponsabilidad" type="xs:string"/>
+																<xs:attribute name="consumidorNuevo" type="xs:string"/>
+																<xs:attribute name="resultadoFinal" type="xs:string"/>
+																<xs:attribute name="indicadorOrigenConsulta" type="xs:string"/>
+															</xs:complexType>
+														</xs:element>
+														<xs:element name="ResumenReporte" minOccurs="0" maxOccurs="unbounded">
+															<xs:complexType>
+																<xs:attribute name="fechaIngresoBD" type="xs:string"/>
+																<xs:attribute name="numeroMOP7" type="xs:double"/>
+																<xs:attribute name="numeroMOP6" type="xs:double"/>
+																<xs:attribute name="numeroMOP5" type="xs:double"/>
+																<xs:attribute name="numeroMOP4" type="xs:double"/>
+																<xs:attribute name="numeroMOP3" type="xs:double"/>
+																<xs:attribute name="numeroMOP2" type="xs:double"/>
+																<xs:attribute name="numeroMOP1" type="xs:double"/>
+																<xs:attribute name="numeroMOP0" type="xs:double"/>
+																<xs:attribute name="numeroMOPUR" type="xs:double"/>
+																<xs:attribute name="numeroCuentas" type="xs:double"/>
+																<xs:attribute name="cuentasPagosFijosHipotecas" type="xs:integer"/>
+																<xs:attribute name="cuentasRevolventesAbiertas" type="xs:integer"/>
+																<xs:attribute name="cuentasCerradas" type="xs:integer"/>
+																<xs:attribute name="cuentasNegativasActuales" type="xs:integer"/>
+																<xs:attribute name="cuentasClavesHistoriaNegativas" type="xs:integer"/>
+																<xs:attribute name="cuentasDisputa" type="xs:integer"/>
+																<xs:attribute name="numeroSolicitudesUltimos6Meses" type="xs:integer"/>
+																<xs:attribute name="nuevaDireccionReportadaUltimos60Dias" type="xs:string"/>
+																<xs:attribute name="mensajeAlerta" type="xs:string"/>
+																<xs:attribute name="existenciaDeclaracionesConsumidor" type="xs:string"/>
+																<xs:attribute name="tipoMoneda" type="xs:string"/>
+																<xs:attribute name="totalCreditosMaximosRevolvente" type="xs:double"/>
+																<xs:attribute name="totalLimitesCreditosRevolventes" type="xs:double"/>
+																<xs:attribute name="totalSaldosActualesRevolventes" type="xs:double"/>
+																<xs:attribute name="totalSaldosVencidosRevolventes" type="xs:double"/>
+																<xs:attribute name="totalPagosRevolventes" type="xs:double"/>
+																<xs:attribute name="pctLimiteCreditoUtilizadosRevolventes" type="xs:double"/>
+																<xs:attribute name="totalCreditosMaximosPagosFijos" type="xs:double"/>
+																<xs:attribute name="totalSaldosActualesPagosFijos" type="xs:double"/>
+																<xs:attribute name="totalSaldosVencidosPagosFijos" type="xs:double"/>
+																<xs:attribute name="totalPagosPagosFijos" type="xs:double"/>
+																<xs:attribute name="numeroMOP96" type="xs:double"/>
+																<xs:attribute name="numeroMOP97" type="xs:double"/>
+																<xs:attribute name="numeroMOP99" type="xs:double"/>
+																<xs:attribute name="fechaAperturaCuentaMasAntigua" type="xs:string"/>
+																<xs:attribute name="fechaAperturaCuentaMasReciente" type="xs:string"/>
+																<xs:attribute name="totalSolicitudesReporte" type="xs:string"/>
+																<xs:attribute name="fechaSolicitudReporteMasReciente" type="xs:string"/>
+																<xs:attribute name="numeroTotalCuentasDespachoCobranza" type="xs:integer"/>
+																<xs:attribute name="fechaAperturaCuentaMasRecienteDespachoCobranza" type="xs:string"/>
+																<xs:attribute name="numeroTotalSolicitudesDespachoCobranza" type="xs:integer"/>
+																<xs:attribute name="fechaSolicitudMasRecienteDespachoCobranza" type="xs:string"/>
+															</xs:complexType>
+														</xs:element>
+													</xs:sequence>
+													<xs:attribute name="nombreScore" type="xs:string"/>
+													<xs:attribute name="valorScore" type="xs:double"/>
+												</xs:complexType>
+											</xs:element>
+											<xs:element name="Seguros" maxOccurs="unbounded">
+												<xs:complexType>
+													<xs:attribute name="idTipoSeguro" type="xs:double"/>
+													<xs:attribute name="ordenSeguro" type="xs:integer"/>
+												</xs:complexType>
+											</xs:element>
+										</xs:sequence>
+										<xs:attribute name="fechaNacimiento" type="xs:date"/>
+										<xs:attribute name="idGradoEstudio" type="xs:integer"/>
+										<xs:attribute name="IdSexo" type="xs:integer"/>
+										<xs:attribute name="accionTomarWL" type="xs:string"/>
+										<xs:attribute name="accionTomarPLD" type="xs:string"/>
+										<xs:attribute name="ingresoMensual" type="xs:double"/>
+										<xs:attribute name="nivelDePuesto" type="xs:string"/>
+										<xs:attribute name="numeroDependientes" type="xs:integer"/>
+										<xs:attribute name="otroProductoInvex" type="xs:double"/>
+										<xs:attribute name="idActividadLaboral" type="xs:integer"/>
+										<xs:attribute name="IdEstadoCivil" type="xs:integer"/>
+										<xs:attribute name="idTipoVivienda" type="xs:integer"/>
+										<xs:attribute name="idNacionalidad" type="xs:integer"/>
+										<xs:attribute name="edad" type="xs:integer"/>
+										<xs:attribute name="nivelDeSueldo" type="xs:string"/>
+										<xs:attribute name="nivelDeRiesgo" type="xs:string"/>
+										<xs:attribute name="antiguedadLaboral" type="xs:integer"/>
+										<xs:attribute name="ingresoInferido" type="xs:double"/>
+										<xs:attribute name="ingresoBC" type="xs:double"/>
+										<xs:attribute name="capacidadDePago" type="xs:double"/>
+										<xs:attribute name="nivelLimiteCredito" type="xs:string"/>
+										<xs:attribute name="razonDePago" type="xs:double"/>
+										<xs:attribute name="numeroDeConsultas" type="xs:integer"/>
+										<xs:attribute name="numeroDeConsultas_6NoUlt7Dias" type="xs:integer"/>
+										<xs:attribute name="revolvingBurden" type="xs:double"/>
+										<xs:attribute name="mopMaxTDCActualBancaria" type="xs:double"/>
+										<xs:attribute name="mopMaxTDCActualDepartamental" type="xs:double"/>
+										<xs:attribute name="mopMaxTDCUlt12Meses" type="xs:double"/>
+										<xs:attribute name="utilizacionTDCActual" type="xs:double"/>
+										<xs:attribute name="razonPagoBC" type="xs:double"/>
+										<xs:attribute name="peorMOPActual" type="xs:double"/>
+										<xs:attribute name="peorMOP24M" type="xs:double"/>
+										<xs:attribute name="antiguedadTDCMasAntigua" type="xs:integer"/>
+										<xs:attribute name="lineaMaximaBC" type="xs:double"/>
+										<xs:attribute name="TDCAbiertas" type="xs:integer"/>
+										<xs:attribute name="mesesDesdeUltimaConsulta" type="xs:integer"/>
+										<xs:attribute name="maxUtilizacionTDCAbiertas" type="xs:double"/>
+										<xs:attribute name="maxantiguedadTot" type="xs:integer"/>
+										<xs:attribute name="maxAntiguedadPP" type="xs:integer"/>
+										<xs:attribute name="maxAntiguedadAuto" type="xs:integer"/>
+										<xs:attribute name="antiguedadHipoMasReciente" type="xs:integer"/>
+										<xs:attribute name="antiguedadPPMasAntigua" type="xs:integer"/>
+										<xs:attribute name="antiguedadPPReciente" type="xs:integer"/>
+										<xs:attribute name="antiguedadTDCMasReciente" type="xs:integer"/>
+										<xs:attribute name="flagCreditoPersonalAbierto" type="xs:integer"/>
+										<xs:attribute name="maxMOPactualRelevante" type="xs:double"/>
+										<xs:attribute name="maxMOPhistoricoRelevante" type="xs:double"/>
+										<xs:attribute name="maxMOPauto" type="xs:double"/>
+										<xs:attribute name="maxMOPhipo" type="xs:double"/>
+										<xs:attribute name="maxMOPtdc" type="xs:double"/>
+										<xs:attribute name="minMesesCierreRelevante" type="xs:integer"/>
+										<xs:attribute name="minMesesMaxMoraRelevante" type="xs:integer"/>
+										<xs:attribute name="flagCurrentCreditoRelevante" type="xs:string"/>
+										<xs:attribute name="numCreditosHipotecarios" type="xs:integer"/>
+										<xs:attribute name="creditoAuto" type="xs:string"/>
+										<xs:attribute name="cuentasRevolventesAbiertas" type="xs:integer"/>
+										<xs:attribute name="cuentasRevolventes" type="xs:integer"/>
+										<xs:attribute name="totalPagosCRA" type="xs:integer"/>
+										<xs:attribute name="cantidadMOP02" type="xs:integer"/>
+										<xs:attribute name="cantidadMOP04" type="xs:integer"/>
+										<xs:attribute name="cantidadMOP07" type="xs:integer"/>
+										<xs:attribute name="cantidadMOP96" type="xs:integer"/>
+										<xs:attribute name="cantidadMOP97" type="xs:integer"/>
+										<xs:attribute name="cantidadMOPUR" type="xs:integer"/>
+										<xs:attribute name="numeroTotalCuentas" type="xs:integer"/>
+										<xs:attribute name="cuentasCerradas" type="xs:integer"/>
+										<xs:attribute name="cuentasMOPnegativas" type="xs:integer"/>
+										<xs:attribute name="cuentasNegativas" type="xs:integer"/>
+										<xs:attribute name="cuentasPagosFijos" type="xs:integer"/>
+										<xs:attribute name="porcentajeLCutilizadoCRA" type="xs:double"/>
+										<xs:attribute name="totalConsultasBC" type="xs:integer"/>
+										<xs:attribute name="totalCreditosMaximosCRA" type="xs:integer"/>
+										<xs:attribute name="totalSaldosVencidosCPFH" type="xs:integer"/>
+										<xs:attribute name="totalSaldosVencidosCRA" type="xs:integer"/>
+										<xs:attribute name="antiguedadBuro" type="xs:integer"/>
+										<xs:attribute name="numCuentasAMEXactivas" type="xs:integer"/>
+										<xs:attribute name="totalPagosMensualizados" type="xs:integer"/>
+										<xs:attribute name="flagCreditoPersonalBancarioAbierto" type="xs:string"/>
+										<xs:attribute name="peorMOPactualGRAL" type="xs:double"/>
+										<xs:attribute name="totalCuentasSINVEXactivas" type="xs:integer"/>
+										<xs:attribute name="maximaAntiguedadBC" type="xs:integer"/>
+										<xs:attribute name="cantidadMOP01" type="xs:integer"/>
+										<xs:attribute name="totalTDCdepartamentalAbiertas" type="xs:integer"/>
+										<xs:attribute name="saldoTotal" type="xs:double"/>
+										<xs:attribute name="nivelTasa" type="xs:string"/>
+										<xs:attribute name="monsmostrecent60plusdel" type="xs:integer"/>
+										<xs:attribute name="monsmostrecent90plusdel" type="xs:integer"/>
+										<xs:attribute name="limiteFinal" type="xs:integer"/>
+										<xs:attribute name="sumsaldoctasbc" type="xs:double"/>
+										<xs:attribute name="sumlineasctasds" type="xs:double"/>
+										<xs:attribute name="maxlineads" type="xs:double"/>
+										<xs:attribute name="percentagetradesneverdel" type="xs:double"/>
+										<xs:attribute name="avrmonthsfile" type="xs:integer"/>
+										<xs:attribute name="monsOldestDateOpened" type="xs:integer"/>
+										<xs:attribute name="installmentburden" type="xs:double"/>
+										<xs:attribute name="numtradesrevnowcurrent" type="xs:integer"/>
+										<xs:attribute name="numtrades60plusever" type="xs:integer"/>
+										<xs:attribute name="numtrades90plusever" type="xs:integer"/>
+										<xs:attribute name="numtradesbalance75plus" type="xs:integer"/>
+										<xs:attribute name="numtradesopenedlast12mons" type="xs:integer"/>
+										<xs:attribute name="numtradesrevballast12mons" type="xs:integer"/>
+										<xs:attribute name="peormopult18meses" type="xs:double"/>
+										<xs:attribute name="sumcreditoshipotecario" type="xs:double"/>
+										<xs:attribute name="utilizacionactualtot" type="xs:integer"/>
+										<xs:attribute name="peormopactualauto" type="xs:double"/>
+										<xs:attribute name="peormopactualpp" type="xs:double"/>
+										<xs:attribute name="peormopautoult24meses" type="xs:double"/>
+										<xs:attribute name="peormopult24mesespp" type="xs:double"/>
+										<xs:attribute name="peormopult24mesestot" type="xs:double"/>
+										<xs:attribute name="sumlineasctastot" type="xs:double"/>
+										<xs:attribute name="sumsaldoctasamex" type="xs:double"/>
+										<xs:attribute name="sumcreditosauto" type="xs:double"/>
+										<xs:attribute name="mesesultimomop03" type="xs:integer"/>
+										<xs:attribute name="numctasbcsaldomayor1k" type="xs:integer"/>
+										<xs:attribute name="numctasbcsaldomayor3k" type="xs:integer"/>
+										<xs:attribute name="numctasbcsaldomayor5k" type="xs:integer"/>
+										<xs:attribute name="numctasby" type="xs:integer"/>
+										<xs:attribute name="maxutilizaciontot" type="xs:double"/>
+										<xs:attribute name="sumlineasctasby" type="xs:double"/>
+										<xs:attribute name="numctastot" type="xs:integer"/>
+										<xs:attribute name="sumsaldoctastot" type="xs:double"/>
+										<xs:attribute name="sumaLCBancario" type="xs:double"/>
+										<xs:attribute name="sumSaldoCtasDs" type="xs:double"/>
+										<xs:attribute name="utilidad_activeTradeLine" type="xs:string"/>
+										<xs:attribute name="utilidad_unusualTradeLine_Installment" type="xs:string"/>
+										<xs:attribute name="utilidad_unusualTradeLine_Revolving" type="xs:string"/>
+										<xs:attribute name="utilidad_normalizeAmount" type="xs:string"/>
+										<xs:attribute name="utilidad_searchPaymentHistory" type="xs:string"/>
+									</xs:complexType>
+								</xs:element>
+								<xs:element name="Oferta" minOccurs="0">
+									<xs:complexType>
+										<xs:attribute name="tasaAnual" type="xs:double"/>
+										<xs:attribute name="fechaCorte" type="xs:date"/>
+										<xs:attribute name="comisionAnualidad" type="xs:double"/>
+										<xs:attribute name="limiteFinal" type="xs:double"/>
+										<xs:attribute name="limiteAsignado" type="xs:double"/>
+										<xs:attribute name="factorLimite" type="xs:double"/>
+										<xs:attribute name="limiteInicial" type="xs:double"/>
+										<xs:attribute name="nivelLimiteCredito" type="xs:double"/>
+										<xs:attribute name="limiteInferior" type="xs:double"/>
+										<xs:attribute name="disposicion" type="xs:double"/>
+										<xs:attribute name="disclosure" type="xs:double"/>
+										<xs:attribute name="exposicion" type="xs:double"/>
+										<xs:attribute name="tasaCAT" type="xs:double"/>
+									</xs:complexType>
+								</xs:element>
+								<xs:element name="Analisis" minOccurs="0">
+									<xs:complexType>
+										<xs:attribute name="respuestaWatchList" type="xs:string"/>
+										<xs:attribute name="respuestaLavado" type="xs:string"/>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+							<xs:attribute name="canalDeVenta" type="xs:string"/>
+							<xs:attribute name="accionTomarDuplicidad" type="xs:string"/>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+				<xs:attribute name="SWDecision" use="optional" default="false">
+					<xs:simpleType>
+						<xs:restriction base="xs:boolean">
+							<xs:pattern value="(true|false)"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+				<xs:attribute name="ApplicationDate" type="xs:date"/>
+				<xs:attribute name="Timestamp" type="xs:dateTime"/>
+				<xs:attribute name="DeliveryOptionCode" type="xs:string" use="optional"/>
+				<xs:attribute name="ApplicationType" use="optional">
+					<xs:simpleType>
+						<xs:union>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+									<xs:maxLength value="25"/>
+								</xs:restriction>
+							</xs:simpleType>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="Not Answered">
+										<xs:annotation>
+											<xs:documentation>Not Answered</xs:documentation>
+										</xs:annotation>
+									</xs:enumeration>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:union>
+					</xs:simpleType>
+				</xs:attribute>
+				<xs:attribute name="DecisioningRequestType" use="optional">
+					<xs:simpleType>
+						<xs:union>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+									<xs:maxLength value="25"/>
+								</xs:restriction>
+							</xs:simpleType>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="Not Answered">
+										<xs:annotation>
+											<xs:documentation>Not Answered</xs:documentation>
+										</xs:annotation>
+									</xs:enumeration>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:union>
+					</xs:simpleType>
+				</xs:attribute>
+				<xs:attribute name="ProcessingRequestType" use="optional">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="DA">
+								<xs:annotation>
+									<xs:documentation>Decision Accelerator</xs:documentation>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="IDM">
+								<xs:annotation>
+									<xs:documentation>Intelligent Data Manager</xs:documentation>
+								</xs:annotation>
+							</xs:enumeration>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+				<xs:attribute name="ResubmissionFlag" use="optional" default="false">
+					<xs:simpleType>
+						<xs:restriction base="xs:boolean">
+							<xs:pattern value="(true|false)"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+				<xs:attribute name="ApplicationCrossReferenceId" use="required">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="1"/>
+							<xs:maxLength value="36"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+				<xs:attribute name="StrategySelectionRandomNumber" use="optional">
+					<xs:simpleType>
+						<xs:restriction base="xs:integer"/>
+					</xs:simpleType>
+				</xs:attribute>
+				<xs:attribute name="TransactionId" use="optional">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:minLength value="1"/>
+							<xs:maxLength value="64"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+			</xs:complexType>
+
+			<xs:element name="MessageList">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:Message" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+					<xs:attribute name="StatusCode" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:integer">
+								<xs:enumeration value="0">
+									<xs:annotation>
+										<xs:documentation>Successful</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="1">
+									<xs:annotation>
+										<xs:documentation>Warning</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="2">
+									<xs:annotation>
+										<xs:documentation>User Error</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="3">
+									<xs:annotation>
+										<xs:documentation>System Error</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="StatusDescription" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:enumeration value="Successful">
+									<xs:annotation>
+										<xs:documentation>Successful</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="Warning">
+									<xs:annotation>
+										<xs:documentation>Warning</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="User Error">
+									<xs:annotation>
+										<xs:documentation>User Error</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="System Error">
+									<xs:annotation>
+										<xs:documentation>System Error</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Message">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Description" minOccurs="0">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+									<xs:maxLength value="2048"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="DetailedDescription" minOccurs="0">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+									<xs:maxLength value="8192"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="Resolution" minOccurs="0">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+									<xs:maxLength value="2048"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="MessageNumber" type="xs:integer" use="optional"/>
+					<xs:attribute name="SeverityCode" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:integer">
+								<xs:enumeration value="0">
+									<xs:annotation>
+										<xs:documentation>Information</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="1">
+									<xs:annotation>
+										<xs:documentation>Warning</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="2">
+									<xs:annotation>
+										<xs:documentation>User Error</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="3">
+									<xs:annotation>
+										<xs:documentation>System Error</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="DecisionResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:Product" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Product">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:Decision" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:Offer" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+					<xs:attribute name="OriginType" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:enumeration value="Request">
+									<xs:annotation>
+										<xs:documentation>Request</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="Cross-sell">
+									<xs:annotation>
+										<xs:documentation>Cross-sell</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="Up-sell">
+									<xs:annotation>
+										<xs:documentation>Up-sell</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="Down-sell">
+									<xs:annotation>
+										<xs:documentation>Down-sell</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="Priority" type="xs:integer" use="optional"/>
+					<xs:attribute name="ProductStatusIndicator" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:enumeration value="Active">
+									<xs:annotation>
+										<xs:documentation>Active</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="Complete">
+									<xs:annotation>
+										<xs:documentation>The product has been processed by Decision Accelerator</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="Error">
+									<xs:annotation>
+										<xs:documentation>The product processing started by Decision Accelerator was interrupted by an error and not completed</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="Inactive">
+									<xs:annotation>
+										<xs:documentation>Inactive</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="Old">
+									<xs:annotation>
+										<xs:documentation>Resubmitted product (on a resubmission, Decision Accelerator will mark previously submitted products as Old and ignore them)</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="StrategyName" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="1"/>
+								<xs:maxLength value="80"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="DecisionFlowName" type="xs:string" use="optional"/>
+					<xs:attribute name="StrategyVersionNumber" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="1"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="LastStepName" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="1"/>
+								<xs:maxLength value="80"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="ProductCategory" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="1"/>
+								<xs:maxLength value="25"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="ProductCode" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="1"/>
+								<xs:maxLength value="25"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="ProductName" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="1"/>
+								<xs:maxLength value="80"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ApplicationScoring">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:ScoreModelOutput" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:UserDefinedField" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="CreditRequest">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:ProductRequestList" minOccurs="0"/>
+						<xs:element ref="tns:UserDefinedField" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+					<xs:attribute name="ProductCategory" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="1"/>
+								<xs:maxLength value="25"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="ProductCode" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="1"/>
+								<xs:maxLength value="25"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ProductRequestList">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:ProductRequest" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:UserDefinedField" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:DataMethodHistory" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ProductRequest">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:UserDefinedField" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:DataMethodHistory" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+					<xs:attribute name="ProductCategory" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="1"/>
+								<xs:maxLength value="25"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="ProductCode" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="1"/>
+								<xs:maxLength value="25"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="DMProduct" use="required">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="1"/>
+								<xs:maxLength value="20"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="Priority" type="xs:integer" use="optional"/>
+					<xs:attribute name="DMFunction" use="required">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="1"/>
+								<xs:maxLength value="20"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="UserDefinedField">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Name">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="DataType">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="boolean">
+										<xs:annotation>
+											<xs:documentation>Boolean</xs:documentation>
+										</xs:annotation>
+									</xs:enumeration>
+									<xs:enumeration value="date">
+										<xs:annotation>
+											<xs:documentation>Date</xs:documentation>
+										</xs:annotation>
+									</xs:enumeration>
+									<xs:enumeration value="duration">
+										<xs:annotation>
+											<xs:documentation>Duration</xs:documentation>
+										</xs:annotation>
+									</xs:enumeration>
+									<xs:enumeration value="integer">
+										<xs:annotation>
+											<xs:documentation>Integer</xs:documentation>
+										</xs:annotation>
+									</xs:enumeration>
+									<xs:enumeration value="real">
+										<xs:annotation>
+											<xs:documentation>Real</xs:documentation>
+										</xs:annotation>
+									</xs:enumeration>
+									<xs:enumeration value="string">
+										<xs:annotation>
+											<xs:documentation>String</xs:documentation>
+										</xs:annotation>
+									</xs:enumeration>
+									<xs:enumeration value="time">
+										<xs:annotation>
+											<xs:documentation>Time</xs:documentation>
+										</xs:annotation>
+									</xs:enumeration>
+									<xs:enumeration value="timestamp">
+										<xs:annotation>
+											<xs:documentation>Timestamp</xs:documentation>
+										</xs:annotation>
+									</xs:enumeration>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="Value" minOccurs="0">
+							<xs:simpleType>
+								<xs:union>
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:minLength value="1"/>
+										</xs:restriction>
+									</xs:simpleType>
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:enumeration value="Not Answered">
+												<xs:annotation>
+													<xs:documentation>Not Answered</xs:documentation>
+												</xs:annotation>
+											</xs:enumeration>
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:union>
+							</xs:simpleType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="DataMethodHistory">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:DataMethodInput" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:DataMethodOutput" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element name="TargetObjectXPath">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="Name">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="DataType">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="Value" minOccurs="0">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="Timestamp" type="xs:dateTime"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="DataMethodInput">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Name">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="DataType">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="Value" minOccurs="0">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="DataMethodOutput">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Name">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="DataType">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="Value" minOccurs="0">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Reason">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="ReasonText" minOccurs="0">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:minLength value="1"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="ReasonCode" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="1"/>
+								<xs:maxLength value="10"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="RankOrderNumber" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:integer">
+								<xs:minInclusive value="1"/>
+								<xs:maxInclusive value="999999999"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Decision">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:Reason" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+					<xs:attribute name="DecisionResult" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="1"/>
+								<xs:maxLength value="25"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="DecisionStatusIndicator" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:enumeration value="Final">
+									<xs:annotation>
+										<xs:documentation>Final</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="Candidate">
+									<xs:annotation>
+										<xs:documentation>Candidate</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="DecisionIndex" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:integer"/>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="ImplementationType" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:enumeration value="Ruleset">
+									<xs:annotation>
+										<xs:documentation>Ruleset</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="Tree">
+									<xs:annotation>
+										<xs:documentation>Decision Tree</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="Scoring Scenario">
+									<xs:annotation>
+										<xs:documentation>Scoring Scenario</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+								<xs:enumeration value="Decision Scenario">
+									<xs:annotation>
+										<xs:documentation>Decision Scenario</xs:documentation>
+									</xs:annotation>
+								</xs:enumeration>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="ImplementationName" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="1"/>
+								<xs:maxLength value="80"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="DecisionPartyId" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:minLength value="1"/>
+								<xs:maxLength value="36"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+					<xs:attribute name="LetterId" type="xs:string" use="optional"/>
+					<xs:attribute name="QueueId" type="xs:string" use="optional"/>
+					<xs:attribute name="DecisionCode" type="xs:string" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Offer">
+				<xs:complexType>
+					<xs:attribute name="OfferId" type="xs:string" use="optional"/>
+					<xs:attribute ref="tns:CreditLimitAmount" use="optional"/>
+					<xs:attribute ref="tns:RatePercent" use="optional"/>
+					<xs:attribute ref="tns:TermInMonths" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:attribute name="CreditLimitAmount">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="0"/>
+						<xs:maxInclusive value="999999999.99"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="RatePercent">
+				<xs:simpleType>
+					<xs:restriction base="xs:double">
+						<xs:minInclusive value="-100.000"/>
+						<xs:maxInclusive value="100.000"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="TermInMonths">
+				<xs:simpleType>
+					<xs:restriction base="xs:integer">
+						<xs:minInclusive value="0"/>
+						<xs:maxInclusive value="999"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:element name="ScoreModelOutput">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:ScoredCharacteristic" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:UserDefinedField" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+					<xs:attribute name="ScoreModelName" type="xs:string" use="optional"/>
+					<xs:attribute name="FinalScore" type="xs:double" use="optional"/>
+					<xs:attribute name="RawScore" type="xs:double" use="optional"/>
+					<xs:attribute name="LogOdds" type="xs:double" use="optional"/>
+					<xs:attribute name="Odds" type="xs:double" use="optional"/>
+					<xs:attribute name="UnexpectedCount" type="xs:integer" use="optional"/>
+					<xs:attribute name="CharacteristicCount" type="xs:integer" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ScoredCharacteristic">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:ReasonCode"/>
+						<xs:element ref="tns:UserDefinedField" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:DataMethodHistory" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+					<xs:attribute name="CharacteristicName" type="xs:string" use="optional"/>
+					<xs:attribute name="BinLabel" type="xs:string" use="optional"/>
+					<xs:attribute name="BaselineScore" type="xs:double" use="optional"/>
+					<xs:attribute name="MaxBinScore" type="xs:double" use="optional"/>
+					<xs:attribute name="PartialScore" type="xs:double" use="optional"/>
+					<xs:attribute name="UnexpectedValueFlag" type="xs:boolean" use="optional"/>
+					<xs:attribute name="ReasonWeight" type="xs:integer" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ReasonCode">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:UserDefinedField" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:DataMethodHistory" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+					<xs:attribute name="Code" type="xs:string" use="optional"/>
+					<xs:attribute name="Message" type="xs:string" use="optional"/>
+					<xs:attribute name="Name" type="xs:string" use="optional"/>
+					<xs:attribute name="Rank" type="xs:integer" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="DecisionFlowHistory">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:FinalDecisionHistory" minOccurs="0"/>
+						<xs:element ref="tns:DecisionFlowStepHistory" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+					<xs:attribute name="DecisionFlowName" type="xs:string" use="optional"/>
+					<xs:attribute name="ProductCategory" type="xs:string" use="optional"/>
+					<xs:attribute name="ProductCode" type="xs:string" use="optional"/>
+					<xs:attribute name="SystemDecisionResult" type="xs:string" use="optional"/>
+					<xs:attribute name="StartTimestamp" type="xs:dateTime" use="optional"/>
+					<xs:attribute name="StopTimestamp" type="xs:dateTime" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="FinalApplicationDecision">
+				<xs:complexType>
+					<xs:attribute name="CreditAnalystId" type="xs:string" use="optional"/>
+					<xs:attribute name="OverrideCode" type="xs:string" use="optional"/>
+					<xs:attribute name="DecisionResult" type="xs:string" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="FinalDecisionHistory">
+				<xs:complexType>
+					<xs:attribute name="FinalDecisionResult" type="xs:string" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ProcessingHistory">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:DecisionFlowHistory" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:FinalApplicationDecision" minOccurs="0"/>
+					</xs:sequence>
+					<xs:attribute name="SystemId" type="xs:string" use="optional"/>
+					<xs:attribute name="ApplicationCrossReferenceId" type="xs:string" use="optional"/>
+					<xs:attribute name="ProcessingTimestamp" type="xs:dateTime" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="DecisionFlowStepHistory">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:RulesetHistory" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:DecisionTreeHistory" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:DecisionTableHistory" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:DataMethodSequenceHistory" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:ScoreModelHistory" minOccurs="0"/>
+					</xs:sequence>
+					<xs:attribute name="StepName" type="xs:string" use="optional"/>
+					<xs:attribute name="StepIndex" type="xs:integer" use="optional"/>
+					<xs:attribute name="ImplementationType" type="xs:string" use="optional"/>
+					<xs:attribute name="ImplementationName" type="xs:string" use="optional"/>
+					<xs:attribute name="StepResult" type="xs:string" use="optional"/>
+					<xs:attribute name="StartTimestamp" type="xs:dateTime" use="optional"/>
+					<xs:attribute name="StopTimestamp" type="xs:dateTime" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="RulesetHistory">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:RuleHistory" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:DecisionHistory" minOccurs="0"/>
+					</xs:sequence>
+					<xs:attribute name="RulesetName" type="xs:string" use="optional"/>
+					<xs:attribute name="RulesetResult" type="xs:string" use="optional"/>
+					<xs:attribute name="RulesFiredTotalSeverity" type="xs:nonNegativeInteger" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="DecisionTreeHistory">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:DecisionScenarioHistory" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:ScoringScenarioHistory" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:PricingScenarioHistory" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:element ref="tns:DecisionHistory" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+					<xs:attribute name="DecisionTreeName" type="xs:string" use="optional"/>
+					<xs:attribute name="DecisionTreeResult" type="xs:string" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="DecisionScenarioHistory">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:DecisionHistory" minOccurs="0"/>
+					</xs:sequence>
+					<xs:attribute name="DecisionScenarioName" type="xs:string" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ScoringScenarioHistory">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:ScoreModelRowHistory" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+					<xs:attribute name="ScoringScenarioName" type="xs:string" use="optional"/>
+					<xs:attribute name="DecisionResult" type="xs:string" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="PricingScenarioHistory">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:OfferHistory" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+					<xs:attribute name="PricingScenarioName" type="xs:string" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="DataMethodSequenceHistory">
+				<xs:complexType>
+					<xs:attribute name="DataMethodSequenceName" type="xs:string" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="DecisionTableHistory">
+				<xs:complexType>
+					<xs:attribute name="DecisionTableName" type="xs:string" use="optional"/>
+					<xs:attribute name="TableResult" type="xs:string" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ScoreModelHistory">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:ScoreModelCharHistory" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+					<xs:attribute name="ScoreModelName" type="xs:string" use="optional"/>
+					<xs:attribute name="FinalScore" type="xs:double" use="optional"/>
+					<xs:attribute name="LogOdds" type="xs:double" use="optional"/>
+					<xs:attribute name="Odds" type="xs:double" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="RuleHistory">
+				<xs:complexType>
+					<xs:attribute name="RuleName" type="xs:string" use="optional"/>
+					<xs:attribute name="ReasonRankOrderNumber" type="xs:integer" use="optional"/>
+					<xs:attribute name="ReasonText" type="xs:string" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="OfferHistory">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:FinalOfferHistory" minOccurs="0"/>
+					</xs:sequence>
+					<xs:attribute name="OfferId" type="xs:string" use="optional"/>
+					<xs:attribute name="RatePercent" type="xs:double" use="optional"/>
+					<xs:attribute name="CreditLimitAmount" type="xs:double" use="optional"/>
+					<xs:attribute name="TermInMonths" type="xs:integer" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="FinalOfferHistory">
+				<xs:complexType>
+					<xs:attribute name="AmountOffered" type="xs:double" use="optional"/>
+					<xs:attribute name="AcceptanceResult" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:enumeration value="Accept"/>
+								<xs:enumeration value="Decline"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ScoreModelCharHistory">
+				<xs:complexType>
+					<xs:attribute name="CharacteristicName" type="xs:string" use="optional"/>
+					<xs:attribute name="BinLabel" type="xs:string" use="optional"/>
+					<xs:attribute name="PartialScore" type="xs:double" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ScoreModelRowHistory">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:ScoreModelHistory" minOccurs="0"/>
+						<xs:element ref="tns:DecisionHistory" minOccurs="0"/>
+					</xs:sequence>
+					<xs:attribute name="RowIndex" type="xs:integer" use="optional"/>
+					<xs:attribute name="PrimaryRowFlag" type="xs:boolean" use="optional"/>
+					<xs:attribute name="LowerCutoffScore" type="xs:integer" use="optional"/>
+					<xs:attribute name="UpperCutoffScore" type="xs:integer" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="DecisionHistory">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element ref="tns:DecisionReason" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+					<xs:attribute name="DecisionResult" type="xs:string" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="DecisionReason">
+				<xs:complexType>
+					<xs:attribute name="reason" type="xs:string" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:schema>
+	</wsdl:types>
+	<wsdl:message name="NewMessageRequest">
+		<wsdl:part name="parameter" element="tns:Application"/>
+	</wsdl:message>
+	<wsdl:message name="NewMessageResponse">
+		<wsdl:part name="parameter" element="tns:Application"/>
+	</wsdl:message>
+	<wsdl:portType name="NewPortType">
+		<wsdl:operation name="NewOperation">
+			<wsdl:input message="tns:NewMessageRequest"/>
+			<wsdl:output message="tns:NewMessageResponse"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="NewBinding" type="tns:NewPortType">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="NewOperation">
+			<soap:operation soapAction="urn:#NewOperation"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="NewService">
+		<wsdl:port name="NewPort" binding="tns:NewBinding">
+			<soap:address location="No Target Adress"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

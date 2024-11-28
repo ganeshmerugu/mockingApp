@@ -7,7 +7,7 @@ import com.mock.application.rest.Service.converter.openapi.OpenApiRestDefinition
 import com.mock.application.rest.Service.converter.raml.RAMLRestDefinitionConverter;
 import com.mock.application.rest.Service.converter.swagger.SwaggerRestDefinitionConverter;
 import com.mock.application.rest.Service.converter.wadl.WADLRestDefinitionConverter;
-import com.mock.application.rest.Service.core.manager.FileManager;
+import com.mock.application.core.manager.FileManager;
 
 public final class RestDefinitionConverterFactory {
 

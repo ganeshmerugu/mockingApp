@@ -87,7 +87,14 @@
 			<artifactId>jaxb-xjc</artifactId>
 			<version>4.0.5</version>
 		</dependency>
-<!--		&lt;!&ndash; https://mvnrepository.com/artifact/org.jvnet.jaxb2.maven2/maven-jaxb2-plugin &ndash;&gt;-->
+		<!-- https://mvnrepository.com/artifact/net.datafaker/datafaker -->
+		<dependency>
+			<groupId>net.datafaker</groupId>
+			<artifactId>datafaker</artifactId>
+			<version>2.4.2</version>
+		</dependency>
+
+		<!--		&lt;!&ndash; https://mvnrepository.com/artifact/org.jvnet.jaxb2.maven2/maven-jaxb2-plugin &ndash;&gt;-->
 <!--		<dependency>-->
 <!--			<groupId>org.jvnet.jaxb2.maven2</groupId>-->
 <!--			<artifactId>maven-jaxb2-plugin</artifactId>-->

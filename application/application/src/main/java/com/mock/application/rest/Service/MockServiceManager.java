@@ -9,7 +9,7 @@ import com.mock.application.rest.Service.converter.openapi.OpenApiRestDefinition
 import com.mock.application.rest.Service.converter.raml.RAMLRestDefinitionConverter;
 import com.mock.application.rest.Service.converter.swagger.SwaggerRestDefinitionConverter;
 import com.mock.application.rest.Service.converter.wadl.WADLRestDefinitionConverter;
-import com.mock.application.rest.Service.core.manager.FileManager;
+import com.mock.application.core.manager.FileManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
