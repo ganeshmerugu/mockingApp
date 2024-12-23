@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<definitions name="TestService"
+             targetNamespace="http://tempuri.org/"
+             xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:tns="http://tempuri.org/"
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+    <types>
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                    targetNamespace="http://tempuri.org/">
+
+            <xsd:element name="TestRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="message" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="TestResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </types>
+
+    <message name="TestRequestMessage">
+        <part name="TestRequestPart" element="tns:TestRequest" />
+    </message>
+    <message name="TestResponseMessage">
+        <part name="TestResponsePart" element="tns:TestResponse" />
+    </message>
+
+    <portType name="TestPortType">
+        <operation name="SendMessage">
+            <input name="TestInput" message="tns:TestRequestMessage" />
+            <output name="TestOutput" message="tns:TestResponseMessage" />
+        </operation>
+    </portType>
+
+    <binding name="TestBinding" type="tns:TestPortType">
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+        <operation name="SendMessage">
+            <soap12:operation soapActionRequired="false"/>
+            <input name="TestInput">
+                <soap12:body use="literal" />
+            </input>
+            <output name="TestOutput">
+                <soap12:body use="literal" />
+            </output>
+        </operation>
+    </binding>
+
+    <service name="TestService">
+        <port name="TestPort" binding="tns:TestBinding">
+            <soap12:address location="http://tempuri.org/testservice" />
+        </port>
+    </service>
+
+
+</definitions>
