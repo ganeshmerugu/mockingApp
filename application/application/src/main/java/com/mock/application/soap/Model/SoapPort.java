@@ -1,9 +1,10 @@
 package com.mock.application.soap.Model;
 
 import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.UUID;
 @Entity
 @Table(name = "soap_port")
 public class SoapPort {
@@ -12,18 +13,19 @@ public class SoapPort {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @ManyToOne
-    @JoinColumn(name = "project_id", nullable = false)
-    private SoapProject project;
-
     @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
-    private String forwardedEndpoint;
+    private String binding;
 
-    @OneToMany(mappedBy = "port", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SoapOperation> operations = new ArrayList<>();
+    @Column(nullable = false)
+    private String address;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_id", nullable = false)
+    private SoapService service;
+
 
     public String getId() {
         return id;
@@ -31,14 +33,6 @@ public class SoapPort {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public SoapProject getProject() {
-        return project;
-    }
-
-    public void setProject(SoapProject project) {
-        this.project = project;
     }
 
     public String getName() {
@@ -49,20 +43,41 @@ public class SoapPort {
         this.name = name;
     }
 
-    public String getForwardedEndpoint() {
-        return forwardedEndpoint;
+
+
+    public SoapService getService() {
+        return service;
     }
 
-    public void setForwardedEndpoint(String forwardedEndpoint) {
-        this.forwardedEndpoint = forwardedEndpoint;
+    public void setService(SoapService service) {
+        this.service = service;
     }
 
-    public List<SoapOperation> getOperations() {
-        return operations;
+
+
+
+
+    public SoapPort() {}
+
+
+    public SoapPort(String name, String binding) {
+        this.name = name;
+        this.binding = binding;
     }
 
-    public void setOperations(List<SoapOperation> operations) {
-        this.operations = operations;
+    public String getBinding() {
+        return binding;
     }
-// Getters and Setters
+
+    public void setBinding(String binding) {
+        this.binding = binding;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 }

@@ -12,6 +12,8 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -19,6 +21,8 @@ import java.util.*;
 
 @Service
 public class OpenApiRestDefinitionConverter implements RestDefinitionConverter {
+
+    private static final Logger log = LoggerFactory.getLogger(OpenApiRestDefinitionConverter.class);
 
     @Override
     public List<RestApplication> convert(File file, String projectId, boolean generateResponse) {
@@ -101,6 +105,7 @@ public class OpenApiRestDefinitionConverter implements RestDefinitionConverter {
 
         restMethod.setMockResponses(mockResponses);
         return restMethod;
+
     }
 
     private RestMockResponse generateMockResponse(String responseCode, io.swagger.v3.oas.models.responses.ApiResponse apiResponse, String httpMethod, String resourceUri, String resourceId, OpenAPI openAPI) {
@@ -170,3 +175,5 @@ public class OpenApiRestDefinitionConverter implements RestDefinitionConverter {
         return Collections.emptyList();
     }
 }
+
+

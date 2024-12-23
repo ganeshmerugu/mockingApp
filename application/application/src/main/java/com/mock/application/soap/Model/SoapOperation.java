@@ -5,75 +5,83 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "soap_operation")
 public class SoapOperation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @ManyToOne
-    @JoinColumn(name = "port_id", nullable = false)
-    private SoapPort port;
-
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private String inputMessage;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "port_type_id", nullable = false)
+    private SoapPortType portType;
 
-    @Column(nullable = false)
-    private String outputMessage;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "input_message_id")
+    private SoapMessage inputMessage;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "output_message_id")
+    private SoapMessage outputMessage;
 
     @OneToMany(mappedBy = "operation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SoapMockResponse> mockResponses = new ArrayList<>();
 
-    // Getters and Setters
+    /** Default no-args constructor required by JPA. */
+    public SoapOperation() {
+    }
+
+    /**
+     * Overloaded constructor - we do NOT set the ID here,
+     * letting @GeneratedValue handle it.
+     */
+    public SoapOperation(String name, SoapPortType portType) {
+        this.name = name;
+        this.portType = portType;
+    }
+
+    // Getters and setters...
 
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public SoapPort getPort() {
-        return port;
-    }
-
-    public void setPort(SoapPort port) {
-        this.port = port;
-    }
+    // Do NOT set the ID manually if you want JPA to generate it
+    // public void setId(String id) { this.id = id; }
 
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
 
-    public String getInputMessage() {
-        return inputMessage;
+    public SoapPortType getPortType() {
+        return portType;
+    }
+    public void setPortType(SoapPortType portType) {
+        this.portType = portType;
     }
 
-    public void setInputMessage(String inputMessage) {
+    public SoapMessage getInputMessage() {
+        return inputMessage;
+    }
+    public void setInputMessage(SoapMessage inputMessage) {
         this.inputMessage = inputMessage;
     }
 
-    public String getOutputMessage() {
+    public SoapMessage getOutputMessage() {
         return outputMessage;
     }
-
-    public void setOutputMessage(String outputMessage) {
+    public void setOutputMessage(SoapMessage outputMessage) {
         this.outputMessage = outputMessage;
     }
 
     public List<SoapMockResponse> getMockResponses() {
         return mockResponses;
     }
-
     public void setMockResponses(List<SoapMockResponse> mockResponses) {
         this.mockResponses = mockResponses;
     }

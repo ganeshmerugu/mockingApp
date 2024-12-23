@@ -119,5 +119,8 @@ public class StaticApiController {
         // Allow flexibility for null or empty values
         return (expectedValue == JSONObject.NULL || actualValue == JSONObject.NULL);
     }
-
+    @GetMapping("/list-mocked-urls")
+    public ResponseEntity<?> listMockedUrls() {
+        return ResponseEntity.ok(mockResponseService.listAllEndpoints());
+    }
 }

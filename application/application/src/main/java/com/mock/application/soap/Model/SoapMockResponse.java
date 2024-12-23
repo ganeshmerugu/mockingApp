@@ -1,10 +1,6 @@
 package com.mock.application.soap.Model;
 
-import com.mock.application.rest.Model.core.HttpHeader;
 import jakarta.persistence.*;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -14,28 +10,33 @@ public class SoapMockResponse {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "operation_id", nullable = false)
     private SoapOperation operation;
 
     @Column(nullable = false)
-    private String name;
+    private String responseName;
 
+    @Lob
     @Column(nullable = false)
-    private String body;
+    private String responseBody;
 
     @Column(nullable = false)
     private int httpStatusCode;
 
+    @Column(nullable = false)
+    private String soapAction;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private SoapMockResponseStatus status;
+    private SoapMockResponseStatus soapMockResponseStatus;
 
 
-    // Default constructor for JPA
+    @Column(nullable = false)
+    private String projectId;
+
     public SoapMockResponse() {}
 
-    // Getters and Setters
     public String getId() {
         return id;
     }
@@ -44,22 +45,28 @@ public class SoapMockResponse {
         this.id = id;
     }
 
-
-
-    public String getName() {
-        return name;
+    public SoapOperation getOperation() {
+        return operation;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setOperation(SoapOperation operation) {
+        this.operation = operation;
     }
 
-    public String getBody() {
-        return body;
+    public String getResponseName() {
+        return responseName;
     }
 
-    public void setBody(String body) {
-        this.body = body;
+    public void setResponseName(String responseName) {
+        this.responseName = responseName;
+    }
+
+    public String getResponseBody() {
+        return responseBody;
+    }
+
+    public void setResponseBody(String responseBody) {
+        this.responseBody = responseBody;
     }
 
     public int getHttpStatusCode() {
@@ -70,92 +77,27 @@ public class SoapMockResponse {
         this.httpStatusCode = httpStatusCode;
     }
 
-
-    public SoapMockResponseStatus getStatus() {
-        return status;
+    public String getSoapAction() {
+        return soapAction;
     }
 
-    public void setStatus(SoapMockResponseStatus status) {
-        this.status = status;
+    public void setSoapAction(String soapAction) {
+        this.soapAction = soapAction;
     }
 
-    // Builder Pattern
-    public static SoapMockResponseBuilder builder() {
-        return new SoapMockResponseBuilder();
+    public SoapMockResponseStatus getSoapMockResponseStatus() {
+        return soapMockResponseStatus;
     }
 
-    public static class SoapMockResponseBuilder {
-        private String id = UUID.randomUUID().toString();
-        private String projectId;
-        private String applicationId;
-        private String soapAction;
-        private String name;
-        private String body;
-        private int httpStatusCode;
-        private List<HttpHeader> httpHeaders = new ArrayList<>();
-        private SoapMethod method;
-        private SoapMockResponseStatus status;
+    public void setSoapMockResponseStatus(SoapMockResponseStatus soapMockResponseStatus) {
+        this.soapMockResponseStatus = soapMockResponseStatus;
+    }
 
-        public SoapMockResponseBuilder id(String id) {
-            this.id = id;
-            return this;
-        }
+    public String getProjectId() {
+        return projectId;
+    }
 
-        public SoapMockResponseBuilder projectId(String projectId) {
-            this.projectId = projectId;
-            return this;
-        }
-
-        public SoapMockResponseBuilder applicationId(String applicationId) {
-            this.applicationId = applicationId;
-            return this;
-        }
-
-        public SoapMockResponseBuilder soapAction(String soapAction) {
-            this.soapAction = soapAction;
-            return this;
-        }
-
-        public SoapMockResponseBuilder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public SoapMockResponseBuilder body(String body) {
-            this.body = body;
-            return this;
-        }
-
-        public SoapMockResponseBuilder httpStatusCode(int httpStatusCode) {
-            this.httpStatusCode = httpStatusCode;
-            return this;
-        }
-
-        public SoapMockResponseBuilder httpHeaders(List<HttpHeader> httpHeaders) {
-            this.httpHeaders = httpHeaders;
-            return this;
-        }
-
-        public SoapMockResponseBuilder method(SoapMethod method) {
-            this.method = method;
-            return this;
-        }
-
-        public SoapMockResponseBuilder status(SoapMockResponseStatus status) {
-            this.status = status;
-            return this;
-        }
-
-        public SoapMockResponse build() {
-            SoapMockResponse response = new SoapMockResponse();
-            response.setId(this.id);
-
-            response.setName(this.name);
-            response.setBody(this.body);
-            response.setHttpStatusCode(this.httpStatusCode);
-
-            response.setStatus(this.status);
-            return response;
-        }
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
     }
 }
