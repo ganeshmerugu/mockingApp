@@ -12,11 +12,11 @@ public class SoapElement {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column
     private String type;
 
     @Column(nullable = false)
-    private boolean isComplexType;
+    private boolean isAttribute;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "soap_type_id", nullable = false)
@@ -48,12 +48,12 @@ public class SoapElement {
         this.type = type;
     }
 
-    public boolean isComplexType() {
-        return isComplexType;
+    public boolean isAttribute() {
+        return isAttribute;
     }
 
-    public void setComplexType(boolean complexType) {
-        isComplexType = complexType;
+    public void setAttribute(boolean attribute) {
+        isAttribute = attribute;
     }
 
     public SoapType getSoapType() {
@@ -64,10 +64,10 @@ public class SoapElement {
         this.soapType = soapType;
     }
 
-    public SoapElement(String id, String name, String type,  SoapType soapType) {
-        this.id = id;
+    public SoapElement(String name, String type, SoapType soapType, boolean isAttribute) {
         this.name = name;
         this.type = type;
         this.soapType = soapType;
+        this.isAttribute = isAttribute;
     }
 }

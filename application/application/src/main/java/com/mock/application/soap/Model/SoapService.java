@@ -21,7 +21,7 @@ public class SoapService {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "definition_id", nullable = false)
-    private SoapDefinition definition;
+    private SoapDefinition soapDefinition;
 
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SoapPort> ports = new ArrayList<>();
@@ -58,20 +58,21 @@ public class SoapService {
     public SoapService() {}
 
     // Parameterized constructor
-    public SoapService(String name, SoapDefinition definition) {
+    public SoapService(String name, SoapDefinition soapDefinition) {
         this.id = UUID.randomUUID().toString();
         this.name = name;
-        this.definition = definition;
+        this.soapDefinition = soapDefinition;
     }
 
 
     // Getters and setters
 
-    public SoapDefinition getDefinition() {
-        return definition;
+
+    public SoapDefinition getSoapDefinition() {
+        return soapDefinition;
     }
 
-    public void setDefinition(SoapDefinition definition) {
-        this.definition = definition;
+    public void setSoapDefinition(SoapDefinition soapDefinition) {
+        this.soapDefinition = soapDefinition;
     }
 }

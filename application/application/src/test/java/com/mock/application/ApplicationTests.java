@@ -1,9 +1,9 @@
-package com.castlemock.application;
+package com.mock.application;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(classes = SpringBootTest.class)
 class ApplicationTests {
 
 	@Test

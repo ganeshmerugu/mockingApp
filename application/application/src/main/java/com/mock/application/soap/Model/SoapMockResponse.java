@@ -1,9 +1,9 @@
 package com.mock.application.soap.Model;
 
 import jakarta.persistence.*;
-import java.util.UUID;
 
 @Entity
+@Table(name = "soap_mock_response")
 public class SoapMockResponse {
 
     @Id
@@ -18,24 +18,36 @@ public class SoapMockResponse {
     private String responseName;
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT") // Specify columnDefinition if necessary
     private String responseBody;
 
     @Column(nullable = false)
     private int httpStatusCode;
 
-    @Column(nullable = false)
     private String soapAction;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SoapMockResponseStatus soapMockResponseStatus;
 
-
-    @Column(nullable = false)
     private String projectId;
 
+    @Column(nullable = false)
+    private boolean fault;
+
+    private String faultCode;
+    private String faultString;
+    private String faultDetail;
+
+    @Lob
+    private String matchCriteria; // JSON string defining match criteria
+
+    // Constructors, Getters, Setters
+
     public SoapMockResponse() {}
+
+    // Getters and Setters
+    // ...
 
     public String getId() {
         return id;
@@ -99,5 +111,45 @@ public class SoapMockResponse {
 
     public void setProjectId(String projectId) {
         this.projectId = projectId;
+    }
+
+    public boolean isFault() {
+        return fault;
+    }
+
+    public void setFault(boolean fault) {
+        this.fault = fault;
+    }
+
+    public String getFaultCode() {
+        return faultCode;
+    }
+
+    public void setFaultCode(String faultCode) {
+        this.faultCode = faultCode;
+    }
+
+    public String getFaultString() {
+        return faultString;
+    }
+
+    public void setFaultString(String faultString) {
+        this.faultString = faultString;
+    }
+
+    public String getFaultDetail() {
+        return faultDetail;
+    }
+
+    public void setFaultDetail(String faultDetail) {
+        this.faultDetail = faultDetail;
+    }
+
+    public String getMatchCriteria() {
+        return matchCriteria;
+    }
+
+    public void setMatchCriteria(String matchCriteria) {
+        this.matchCriteria = matchCriteria;
     }
 }

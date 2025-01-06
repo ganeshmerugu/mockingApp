@@ -1,8 +1,13 @@
 package com.mock.application.soap.Service.converter.wsdl;
 
 import com.mock.application.soap.Model.*;
+import com.mock.application.soap.Repository.SoapMockResponseRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+// Import other necessary packages
+
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -11,13 +16,26 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 public class WSDL11SoapDefinitionConverter {
 
     private static final Logger logger = LoggerFactory.getLogger(WSDL11SoapDefinitionConverter.class);
 
+    @Autowired
+    private SoapMockResponseRepository soapMockResponseRepository; // **To be removed**
+
+    @Autowired
+    private ObjectMapper objectMapper; // For JSON parsing
+
+    /**
+     * Converts a WSDL file into a SoapDefinition and creates corresponding mock responses.
+     *
+     * @param wsdlFile  The WSDL file to parse.
+     * @param projectId The associated project ID.
+     * @return The parsed SoapDefinition.
+     */
     public SoapDefinition convert(File wsdlFile, String projectId) {
         logger.debug("Entering convert(...) with wsdlFile={} and projectId={}", wsdlFile, projectId);
         try {
@@ -50,9 +68,6 @@ public class WSDL11SoapDefinitionConverter {
             logger.info("Completed parsing for definition: {}", soapDefinition.getName());
             return soapDefinition;
 
-        } catch (ArrayIndexOutOfBoundsException e) {
-            logger.error("Index out of bounds while parsing WSDL file: {}", wsdlFile.getAbsolutePath(), e);
-            throw new RuntimeException("Incorrect WSDL file format", e);
         } catch (Exception e) {
             logger.error("Error parsing WSDL file: {}", wsdlFile.getAbsolutePath(), e);
             throw new RuntimeException("Error parsing WSDL file", e);
@@ -61,6 +76,9 @@ public class WSDL11SoapDefinitionConverter {
         }
     }
 
+    /**
+     * Parses the top-level definitions element.
+     */
     private void parseDefinitions(Element definitions, SoapDefinition soapDefinition) {
         logger.debug("parseDefinitions: Checking <types>, <message>, <portType>, <binding>, <service> elements.");
 
@@ -71,54 +89,114 @@ public class WSDL11SoapDefinitionConverter {
         parseServices(definitions.getElementsByTagNameNS("*", "service"), soapDefinition);
     }
 
+    /**
+     * Parses <types> elements to extract complex types.
+     */
     private void parseTypes(NodeList types, SoapDefinition soapDefinition) {
         logger.debug("parseTypes: Found {} <types> elements.", types.getLength());
         for (int i = 0; i < types.getLength(); i++) {
             Element typeElement = (Element) types.item(i);
             NodeList schemas = typeElement.getElementsByTagNameNS("*", "schema");
-            logger.debug("Inside <types> #{}: Found {} <schema> elements.", i, schemas.getLength());
+            logger.debug("Inside <types> #{}: Found {} <schema> elements.", i + 1, schemas.getLength());
 
             for (int j = 0; j < schemas.getLength(); j++) {
                 Element schemaElement = (Element) schemas.item(j);
                 NodeList elements = schemaElement.getElementsByTagNameNS("*", "element");
-                logger.debug("Inside <schema> #{}: Found {} <element> definitions.", j, elements.getLength());
+                logger.debug("Inside <schema> #{}: Found {} <element> definitions.", j + 1, elements.getLength());
 
                 for (int k = 0; k < elements.getLength(); k++) {
                     Element element = (Element) elements.item(k);
                     String typeName = element.getAttribute("name");
+                    if (typeName == null || typeName.isEmpty()) {
+                        logger.warn("Skipping <element> with missing 'name' attribute.");
+                        continue;
+                    }
                     String definition = extractTypeDefinition(element);
 
-                    SoapType soapType = new SoapType(UUID.randomUUID().toString(), typeName, definition, soapDefinition);
-                    soapDefinition.getTypes().add(soapType);
+                    SoapType soapType = new SoapType(
+                            typeName,
+                            definition,
+                            soapDefinition
+                    );
+                    soapDefinition.addType(soapType); // Use utility method
 
-                    logger.info("Parsed SoapType: Name={} Definition={}", typeName, definition);
+                    logger.info("Parsed SoapType: Name='{}' Definition='{}'", typeName, definition);
 
-                    // Parse child <element> tags inside this type
+                    // Parse child <element> and <attribute> tags inside this type
                     parseSoapElements(element, soapType);
                 }
             }
         }
     }
 
+    /**
+     * Parses child <element> and <attribute> tags within a complex type.
+     */
     private void parseSoapElements(Element element, SoapType soapType) {
+        // Parse child <element> tags
         NodeList elementNodes = element.getElementsByTagNameNS("*", "element");
         logger.debug("parseSoapElements: Found {} child <element> tags for SoapType '{}'.",
-                elementNodes.getLength(), soapType.getName());
+                elementNodes.getLength(), soapType.getTypeName());
 
         for (int i = 0; i < elementNodes.getLength(); i++) {
             Element childElement = (Element) elementNodes.item(i);
             String elementName = childElement.getAttribute("name");
             String elementType = childElement.getAttribute("type");
 
+            if (elementName == null || elementName.isEmpty()) {
+                logger.warn("Skipping <element> with missing 'name' in SoapType '{}'.", soapType.getTypeName());
+                continue;
+            }
+
+            // If 'type' is missing, set it as null
+            if (elementType != null && elementType.isEmpty()) {
+                elementType = null;
+                logger.warn("Element '{}' in SoapType '{}' is missing 'type' attribute. Setting type as null.",
+                        elementName, soapType.getTypeName());
+            }
+
             SoapElement soapElement = new SoapElement(
-                    UUID.randomUUID().toString(),
                     elementName,
                     elementType,
-                    soapType
+                    soapType,
+                    false // isAttribute = false
             );
-            soapType.getElements().add(soapElement);
+            soapType.addElement(soapElement); // Use utility method
 
-            logger.info("Parsed SoapElement: Name={} Type={}", elementName, elementType);
+            logger.info("Parsed SoapElement: Name='{}' Type='{}'", elementName, elementType);
+        }
+
+        // Parse child <attribute> tags
+        NodeList attributeNodes = element.getElementsByTagNameNS("*", "attribute");
+        logger.debug("parseSoapElements: Found {} child <attribute> tags for SoapType '{}'.",
+                attributeNodes.getLength(), soapType.getTypeName());
+
+        for (int i = 0; i < attributeNodes.getLength(); i++) {
+            Element attributeElement = (Element) attributeNodes.item(i);
+            String attributeName = attributeElement.getAttribute("name");
+            String attributeType = attributeElement.getAttribute("type");
+
+            if (attributeName == null || attributeName.isEmpty()) {
+                logger.warn("Skipping <attribute> with missing 'name' in SoapType '{}'.", soapType.getTypeName());
+                continue;
+            }
+
+            // If 'type' is missing, set it as null
+            if (attributeType != null && attributeType.isEmpty()) {
+                attributeType = null;
+                logger.warn("Attribute '{}' in SoapType '{}' is missing 'type' attribute. Setting type as null.",
+                        attributeName, soapType.getTypeName());
+            }
+
+            SoapElement soapAttribute = new SoapElement(
+                    attributeName,
+                    attributeType,
+                    soapType,
+                    true // isAttribute = true
+            );
+            soapType.addElement(soapAttribute); // Use utility method
+
+            logger.info("Parsed SoapAttribute: Name='{}' Type='{}'", attributeName, attributeType);
         }
     }
 
@@ -131,7 +209,7 @@ public class WSDL11SoapDefinitionConverter {
             Element messageElement = (Element) messages.item(i);
             String messageName = messageElement.getAttribute("name");
             if (messageName == null || messageName.isEmpty()) {
-                logger.warn("Skipping <message> with empty name attribute.");
+                logger.warn("Skipping <message> with empty 'name' attribute.");
                 continue;
             }
 
@@ -144,14 +222,11 @@ public class WSDL11SoapDefinitionConverter {
 
             // Otherwise, create a new SoapMessage
             SoapMessage message = new SoapMessage(
-                    UUID.randomUUID().toString(),
                     messageName,
                     soapDefinition
             );
-            // Attach the new SoapMessage to the definition
-            soapDefinition.getMessages().add(message);
-            // If your entity uses setSoapDefinition(...) or setDefinition(...):
-            message.setSoapDefinition(soapDefinition);
+            // Attach the new SoapMessage to the definition using utility method
+            soapDefinition.addMessage(message);
 
             logger.info("Parsed Message: {}", messageName);
 
@@ -161,7 +236,7 @@ public class WSDL11SoapDefinitionConverter {
             for (int p = 0; p < partNodes.getLength(); p++) {
                 Element partEl = (Element) partNodes.item(p);
                 String partName = partEl.getAttribute("name");
-                String elementAttr = partEl.getAttribute("element");  // e.g. "tns:add"
+                String elementAttr = partEl.getAttribute("element");  // e.g., "tns:add"
                 String typeAttr = partEl.getAttribute("type");        // if using type=...
 
                 if (partName == null || partName.isEmpty()) {
@@ -169,18 +244,22 @@ public class WSDL11SoapDefinitionConverter {
                     continue;
                 }
 
-                // Create SoapMessagePart
+                // Determine whether to use 'element' or 'type'
+                String finalElement = (elementAttr != null && !elementAttr.isEmpty()) ? elementAttr : typeAttr;
+
+                if (finalElement == null || finalElement.isEmpty()) {
+                    logger.warn("Skipping <part> with empty 'element' and 'type' in message '{}'.", messageName);
+                    continue;
+                }
+
+                // Create SoapMessagePart using setters to ensure 'name' is set
                 SoapMessagePart messagePart = new SoapMessagePart();
-                messagePart.setId(UUID.randomUUID().toString());
-                messagePart.setName(partName);
-
-                // If 'element' is blank, fallback to 'type'
-                String finalElement = elementAttr.isEmpty() ? typeAttr : elementAttr;
-                messagePart.setElement(finalElement);
-
-                // Link to the SoapMessage
+                messagePart.setPartName(partName);
+                messagePart.setElementOrType(finalElement);
                 messagePart.setMessage(message);
-                message.getParts().add(messagePart);
+
+                // Attach the new SoapMessagePart to the message using utility method
+                message.addPart(messagePart);
 
                 logger.info("Parsed SoapMessagePart: name='{}', elementOrType='{}' for message='{}'",
                         partName, finalElement, messageName);
@@ -195,12 +274,21 @@ public class WSDL11SoapDefinitionConverter {
                 .orElse(null);
     }
 
+    /**
+     * Parses <portType> elements to extract operations.
+     */
     private void parsePortTypes(NodeList portTypes, SoapDefinition soapDefinition) {
+        logger.debug("parsePortTypes: Found {} <portType> elements.", portTypes.getLength());
         for (int i = 0; i < portTypes.getLength(); i++) {
             Element portTypeElement = (Element) portTypes.item(i);
             String portTypeName = portTypeElement.getAttribute("name");
+            if (portTypeName == null || portTypeName.isEmpty()) {
+                logger.warn("Skipping <portType> with empty 'name' attribute.");
+                continue;
+            }
+
             SoapPortType portType = new SoapPortType(portTypeName, soapDefinition);
-            soapDefinition.getPortTypes().add(portType);
+            soapDefinition.addPortType(portType); // Use utility method
 
             NodeList operationNodes = portTypeElement.getElementsByTagNameNS("*", "operation");
             for (int j = 0; j < operationNodes.getLength(); j++) {
@@ -212,7 +300,7 @@ public class WSDL11SoapDefinitionConverter {
                 }
 
                 SoapOperation operation = new SoapOperation(operationName, portType);
-                portType.getOperations().add(operation);
+                portType.addOperation(operation); // Use utility method
 
                 // Link input/output messages:
                 linkOperationMessages(operationElement, operation, soapDefinition);
@@ -222,6 +310,9 @@ public class WSDL11SoapDefinitionConverter {
         }
     }
 
+    /**
+     * Links input and output messages to the operation.
+     */
     private void linkOperationMessages(Element operationElement, SoapOperation operation, SoapDefinition definition) {
         logger.info("linkOperationMessages: Processing operation '{}' under portType '{}'",
                 operation.getName(),
@@ -231,78 +322,73 @@ public class WSDL11SoapDefinitionConverter {
         NodeList inputNodes = operationElement.getElementsByTagNameNS("*", "input");
         logger.debug("Found {} <input> node(s) for operation '{}'.", inputNodes.getLength(), operation.getName());
         if (inputNodes.getLength() > 0) {
-            logger.debug("Creating a new input SoapMessage for operation '{}'.",
-                    operation.getName());
-
-            SoapMessage inputMsg = new SoapMessage(
-                    UUID.randomUUID().toString(),
-                    operation.getName() + "_Input_" + System.currentTimeMillis(),
-                    definition
-            );
-            logger.debug("New inputMsg => ID='{}', Name='{}'", inputMsg.getId(), inputMsg.getName());
-
-            definition.getMessages().add(inputMsg);
-            operation.setInputMessage(inputMsg);
-
-            logger.info("Operation '{}' now references inputMessage ID='{}'.", operation.getName(), inputMsg.getId());
+            Element inputElement = (Element) inputNodes.item(0);
+            String inputMessageRef = inputElement.getAttribute("message");
+            if (inputMessageRef != null && !inputMessageRef.isEmpty()) {
+                String inputMessageName = getLocalName(inputMessageRef, inputElement);
+                SoapMessage inputMsg = findMessageByExactName(inputMessageName, definition);
+                if (inputMsg == null) {
+                    // Create new SoapMessage if it doesn't exist
+                    inputMsg = new SoapMessage(
+                            inputMessageName,
+                            definition
+                    );
+                    definition.addMessage(inputMsg);
+                    logger.info("Created new input SoapMessage: Name='{}'", inputMessageName);
+                }
+                operation.setInputMessage(inputMsg);
+                logger.info("Operation '{}' now references inputMessage ID='{}'.", operation.getName(), inputMsg.getId());
+            }
         }
 
         // <output message="...">
         NodeList outputNodes = operationElement.getElementsByTagNameNS("*", "output");
         logger.debug("Found {} <output> node(s) for operation '{}'.", outputNodes.getLength(), operation.getName());
         if (outputNodes.getLength() > 0) {
-            logger.debug("Creating a new output SoapMessage for operation '{}'.",
-                    operation.getName());
-
-            SoapMessage outputMsg = new SoapMessage(
-                    UUID.randomUUID().toString(),
-                    operation.getName() + "_Output_" + System.currentTimeMillis(),
-                    definition
-            );
-            logger.debug("New outputMsg => ID='{}', Name='{}'", outputMsg.getId(), outputMsg.getName());
-
-            definition.getMessages().add(outputMsg);
-            operation.setOutputMessage(outputMsg);
-
-            logger.info("Operation '{}' now references outputMessage ID='{}'.", operation.getName(), outputMsg.getId());
+            Element outputElement = (Element) outputNodes.item(0);
+            String outputMessageRef = outputElement.getAttribute("message");
+            if (outputMessageRef != null && !outputMessageRef.isEmpty()) {
+                String outputMessageName = getLocalName(outputMessageRef, outputElement);
+                SoapMessage outputMsg = findMessageByExactName(outputMessageName, definition);
+                if (outputMsg == null) {
+                    // Create new SoapMessage if it doesn't exist
+                    outputMsg = new SoapMessage(
+                            outputMessageName,
+                            definition
+                    );
+                    definition.addMessage(outputMsg);
+                    logger.info("Created new output SoapMessage: Name='{}'", outputMessageName);
+                }
+                operation.setOutputMessage(outputMsg);
+                logger.info("Operation '{}' now references outputMessage ID='{}'.", operation.getName(), outputMsg.getId());
+            }
         }
 
         logger.debug("Finished linking messages for operation '{}'.", operation.getName());
     }
 
-    private SoapMessage findMessageByName(String messageName, SoapDefinition definition) {
-        if (messageName.contains(":")) {
-            messageName = messageName.substring(messageName.indexOf(':') + 1);
+    private String getLocalName(String qName, Element element) {
+        if (qName == null || qName.isEmpty()) {
+            return null;
         }
-        for (SoapMessage msg : definition.getMessages()) {
-            if (msg.getName().equalsIgnoreCase(messageName)) {
-                return msg;
+        String[] parts = qName.split(":");
+        if (parts.length != 2) {
+            return qName; // Return as is if no prefix
+        }
+        String prefix = parts[0];
+        String localName = parts[1];
+        if (element != null) {
+            String namespaceURI = element.lookupNamespaceURI(prefix);
+            if (namespaceURI == null) {
+                logger.warn("Could not resolve namespace for prefix '{}'", prefix);
             }
         }
-        return null;
+        return localName;
     }
 
-    private void parseOperations(Element portTypeElement, SoapPortType portType) {
-        NodeList operationNodes = portTypeElement.getElementsByTagNameNS("*", "operation");
-        logger.debug("parseOperations: Found {} <operation> elements inside portType '{}'.",
-                operationNodes.getLength(), portType.getName());
-
-        for (int i = 0; i < operationNodes.getLength(); i++) {
-            Element operationElement = (Element) operationNodes.item(i);
-            String operationName = operationElement.getAttribute("name");
-            if (operationName == null || operationName.isEmpty()) {
-                logger.warn("Skipping <operation> with empty 'name' in portType '{}'.", portType.getName());
-                continue;
-            }
-
-            SoapOperation operation = new SoapOperation(operationName, portType);
-            portType.getOperations().add(operation);
-            operation.setPortType(portType);
-
-            logger.info("Parsed Operation: {} under portType '{}'", operationName, portType.getName());
-        }
-    }
-
+    /**
+     * Parses <binding> elements to extract binding operations and create mock responses.
+     */
     private void parseBindings(NodeList bindings, SoapDefinition soapDefinition) {
         logger.debug("parseBindings: Found {} <binding> elements.", bindings.getLength());
 
@@ -338,6 +424,9 @@ public class WSDL11SoapDefinitionConverter {
         }
     }
 
+    /**
+     * Parses <operation> elements within a binding to extract soapAction and create mock responses.
+     */
     private void parseBindingOperations(Element bindingElement, SoapBinding binding, SoapPortType portType) {
         NodeList operationNodes = bindingElement.getElementsByTagNameNS("*", "operation");
         logger.debug("parseBindingOperations: Found {} <operation> elements under binding '{}'.",
@@ -365,15 +454,21 @@ public class WSDL11SoapDefinitionConverter {
                     binding,
                     operation,
                     soapAction,
-                    "document"
+                    "document" // Assuming 'document' style; can be enhanced to parse actual style
             );
             binding.getBindingOperations().add(bindingOperation);
 
             logger.info("Parsed BindingOperation: operationName='{}', soapAction='{}', style='document'",
                     operationName, soapAction);
+
+            // After parsing the binding operation, create mock responses
+            createMockResponsesForOperation(operation, soapAction, binding.getName(), binding.getSoapDefinition());
         }
     }
 
+    /**
+     * Retrieves the soapAction from a binding operation.
+     */
     private String getSoapAction(Element operationElement) {
         NodeList soapOperationNodes = operationElement.getElementsByTagNameNS("*", "operation");
         if (soapOperationNodes.getLength() > 0) {
@@ -385,6 +480,9 @@ public class WSDL11SoapDefinitionConverter {
         return null;
     }
 
+    /**
+     * Finds an operation by name within a portType.
+     */
     private SoapOperation findOperationByName(String operationName, SoapPortType portType) {
         logger.debug("findOperationByName: Searching for operationName='{}' in portType='{}'",
                 operationName, portType.getName());
@@ -394,7 +492,11 @@ public class WSDL11SoapDefinitionConverter {
                 .orElse(null);
     }
 
+    /**
+     * Parses <service> elements to extract service ports.
+     */
     private void parseServices(NodeList services, SoapDefinition soapDefinition) {
+        logger.debug("parseServices: Found {} <service> elements.", services.getLength());
         for (int i = 0; i < services.getLength(); i++) {
             Element serviceElement = (Element) services.item(i);
             String serviceName = serviceElement.getAttribute("name");
@@ -412,6 +514,11 @@ public class WSDL11SoapDefinitionConverter {
                 Element portElement = (Element) portNodes.item(j);
                 String portName = portElement.getAttribute("name");
                 String binding = portElement.getAttribute("binding");
+
+                if (binding == null || binding.isEmpty()) {
+                    logger.warn("Port '{}' in Service '{}' has empty 'binding' attribute. Skipping.", portName, serviceName);
+                    continue;
+                }
 
                 SoapPort soapPort = new SoapPort(portName, binding);
 
@@ -431,11 +538,226 @@ public class WSDL11SoapDefinitionConverter {
         }
     }
 
+    /**
+     * Creates mock responses (success and fault) for a given SoapOperation.
+     *
+     * **Note:** Previously, mock responses were being saved directly via the repository.
+     *       Now, they are added to the SoapOperation and will be persisted via cascading.
+     *
+     * @param operation      The SoapOperation.
+     * @param soapAction     The SOAP action associated with the operation.
+     * @param bindingName    The name of the binding.
+     * @param soapDefinition The SoapDefinition.
+     */
+    private void createMockResponsesForOperation(SoapOperation operation, String soapAction, String bindingName, SoapDefinition soapDefinition) {
+        logger.debug("createMockResponsesForOperation: Creating mock responses for operation '{}'.", operation.getName());
+
+        // 1. Create a static success response
+        SoapMockResponse successResponse = new SoapMockResponse();
+        successResponse.setResponseName(operation.getName() + "SuccessResponse");
+        successResponse.setProjectId(soapDefinition.getProjectId());
+        successResponse.setOperation(operation);
+        successResponse.setHttpStatusCode(200);
+        successResponse.setResponseBody(createSuccessResponseBody(operation));
+        successResponse.setSoapAction(soapAction);
+        successResponse.setSoapMockResponseStatus(SoapMockResponseStatus.ENABLED);
+        successResponse.setFault(false);
+        successResponse.setMatchCriteria(createMatchCriteriaForSuccess(operation));
+
+        // **Remove the direct save to repository**
+        // soapMockResponseRepository.save(successResponse);
+
+        // Add to operation
+        operation.addMockResponse(successResponse);
+        logger.info("Created static success SoapMockResponse: {}", successResponse.getResponseName());
+
+        // 2. Create a fault response
+        SoapMockResponse faultResponse = new SoapMockResponse();
+        faultResponse.setResponseName(operation.getName() + "FaultResponse");
+        faultResponse.setProjectId(soapDefinition.getProjectId());
+        faultResponse.setOperation(operation);
+        faultResponse.setHttpStatusCode(500);
+        faultResponse.setResponseBody(createFaultResponseBody(operation));
+        faultResponse.setSoapAction(soapAction);
+        faultResponse.setSoapMockResponseStatus(SoapMockResponseStatus.ENABLED);
+        faultResponse.setFault(true);
+        faultResponse.setFaultCode("soapenv:Client");
+        faultResponse.setFaultString("Invalid parameters");
+        faultResponse.setFaultDetail("<ns1:ErrorDetail xmlns:ns1=\"" + soapDefinition.getTargetNamespace() + "\"><message>Invalid request parameters.</message></ns1:ErrorDetail>");
+        faultResponse.setMatchCriteria(createMatchCriteriaForFault(operation));
+
+        // **Remove the direct save to repository**
+        // soapMockResponseRepository.save(faultResponse);
+
+        // Add to operation
+        operation.addMockResponse(faultResponse);
+        logger.info("Created fault SoapMockResponse: {}", faultResponse.getResponseName());
+    }
+
+    /**
+     * Generates a success response body for a given operation based on its output message.
+     *
+     * @param operation The SoapOperation.
+     * @return The SOAP response body as a String.
+     */
+    private String createSuccessResponseBody(SoapOperation operation) {
+        SoapMessage outputMessage = operation.getOutputMessage();
+        if (outputMessage == null) {
+            logger.warn("Operation '{}' has no output message. Returning empty body.", operation.getName());
+            return "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"><soapenv:Body></soapenv:Body></soapenv:Envelope>";
+        }
+
+        StringBuilder responseBuilder = new StringBuilder();
+        responseBuilder.append("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" ")
+                .append("xmlns:ns=\"").append(operation.getPortType().getSoapDefinition().getTargetNamespace()).append("\">")
+                .append("<soapenv:Header/>")
+                .append("<soapenv:Body>")
+                .append("<ns:").append(getResponseElementName(operation)).append(">");
+
+        // Iterate over output message parts to construct response
+        for (SoapMessagePart part : outputMessage.getParts()) {
+            String partName = part.getPartName();
+            String partType = part.getElementOrType();
+            String defaultValue = getDefaultValueForType(partType);
+
+            responseBuilder.append("<ns:").append(partName).append(">")
+                    .append(defaultValue)
+                    .append("</ns:").append(partName).append(">");
+        }
+
+        responseBuilder.append("</ns:").append(getResponseElementName(operation)).append(">")
+                .append("</soapenv:Body>")
+                .append("</soapenv:Envelope>");
+
+        return responseBuilder.toString();
+    }
+
+    /**
+     * Determines the response element name based on operation.
+     * Typically, it's the operation name appended with "Response".
+     *
+     * @param operation The SoapOperation.
+     * @return The response element name.
+     */
+    private String getResponseElementName(SoapOperation operation) {
+        return operation.getName() + "Response";
+    }
+
+    /**
+     * Provides a default value based on the XML schema type.
+     *
+     * @param type The XML schema type.
+     * @return A default value as String.
+     */
+    private String getDefaultValueForType(String type) {
+        if (type == null) {
+            return "";
+        }
+        switch (type) {
+            case "xs:string":
+                return "SampleString";
+            case "xs:int":
+            case "xs:integer":
+                return "0";
+            case "xs:float":
+            case "xs:double":
+                return "0.0";
+            case "xs:boolean":
+                return "false";
+            // Add more cases as needed
+            default:
+                return "SampleData";
+        }
+    }
+
+    /**
+     * Generates a fault response body for a given operation.
+     *
+     * @param operation The SoapOperation.
+     * @return The SOAP fault response body as a String.
+     */
+    private String createFaultResponseBody(SoapOperation operation) {
+        // Generic fault response
+        return "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
+                "<soapenv:Body>" +
+                "<soapenv:Fault>" +
+                "<faultcode>soapenv:Client</faultcode>" +
+                "<faultstring>Invalid parameters</faultstring>" +
+                "<detail>" +
+                "<ns1:ErrorDetail xmlns:ns1=\"" + operation.getPortType().getSoapDefinition().getTargetNamespace() + "\">" +
+                "<message>Invalid request parameters.</message>" +
+                "</ns1:ErrorDetail>" +
+                "</detail>" +
+                "</soapenv:Fault>" +
+                "</soapenv:Body>" +
+                "</soapenv:Envelope>";
+    }
+
+    /**
+     * Creates match criteria JSON string for a successful response based on operation's input message.
+     *
+     * @param operation The SoapOperation.
+     * @return The match criteria as a JSON string.
+     */
+    private String createMatchCriteriaForSuccess(SoapOperation operation) {
+        SoapMessage inputMessage = operation.getInputMessage();
+        if (inputMessage == null) {
+            logger.warn("Operation '{}' has no input message. Using default match criteria.", operation.getName());
+            return "{\"criteria\": \"success\"}";
+        }
+
+        Map<String, String> criteria = new HashMap<>();
+        for (SoapMessagePart part : inputMessage.getParts()) {
+            // Assume any value is acceptable for success
+            criteria.put(part.getPartName(), "any");
+        }
+
+        try {
+            return objectMapper.writeValueAsString(criteria);
+        } catch (Exception e) {
+            logger.error("Error creating match criteria for success: {}", e.getMessage(), e);
+            return "{\"criteria\": \"success\"}";
+        }
+    }
+
+    /**
+     * Creates match criteria JSON string for a fault response based on operation's input message.
+     *
+     * @param operation The SoapOperation.
+     * @return The match criteria as a JSON string.
+     */
+    private String createMatchCriteriaForFault(SoapOperation operation) {
+        SoapMessage inputMessage = operation.getInputMessage();
+        if (inputMessage == null) {
+            logger.warn("Operation '{}' has no input message. Using default fault match criteria.", operation.getName());
+            return "{\"criteria\": \"fault\"}";
+        }
+
+        Map<String, String> criteria = new HashMap<>();
+        for (SoapMessagePart part : inputMessage.getParts()) {
+            // Assume specific invalid value to trigger fault
+            criteria.put(part.getPartName(), "INVALID");
+        }
+
+        try {
+            return objectMapper.writeValueAsString(criteria);
+        } catch (Exception e) {
+            logger.error("Error creating match criteria for fault: {}", e.getMessage(), e);
+            return "{\"criteria\": \"fault\"}";
+        }
+    }
+
+    /**
+     * Extracts the type definition recursively.
+     *
+     * @param element The current XML element.
+     * @return The type definition as a String.
+     */
     private String extractTypeDefinition(Element element) {
         String typeAttr = element.getAttribute("type");
         logger.debug("extractTypeDefinition: element=<{}>, typeAttr='{}'", element.getTagName(), typeAttr);
 
-        if (typeAttr != null && typeAttr.startsWith("s:")) {
+        if (typeAttr != null && typeAttr.startsWith("xs:")) { // Corrected prefix
             // It's a primitive
             return "primitive: " + typeAttr;
         }
@@ -454,6 +776,13 @@ public class WSDL11SoapDefinitionConverter {
         return definitionBuilder.toString();
     }
 
+    /**
+     * Finds a portType by its QName.
+     *
+     * @param bindingType    The QName of the portType (e.g., "tns:PortTypeName").
+     * @param soapDefinition The SoapDefinition to search within.
+     * @return The matching SoapPortType or null if not found.
+     */
     private SoapPortType findPortTypeByName(String bindingType, SoapDefinition soapDefinition) {
         if (bindingType == null || !bindingType.contains(":")) {
             logger.warn("Invalid binding type format in findPortTypeByName(...): '{}'", bindingType);

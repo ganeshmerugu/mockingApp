@@ -1,32 +1,99 @@
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Application.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Controller/MockController.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Model/MockService.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Model/ResponseGenerator.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Model/WADLApplication.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Model/WADLMethod.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Model/WADLResource.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Model/WADLResources.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Repository/MockServiceRepository.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Service/ForwardingService.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Service/MockServiceManager.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Service/RAMLParserUtil.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Service/SwaggerParserUtil.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Service/WADLParserUtil.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Service/WSDLParserUtil.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Service/reponseGenerationStrategy/QueryMatchResponseStrategy.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Service/reponseGenerationStrategy/RandomResponseStrategy.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Service/reponseGenerationStrategy/ResponseGenerationStrategy.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/com/castlemock/application/Service/reponseGenerationStrategy/SequenceResponseStrategy.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/net/java/dev/wadl/_2009/_02/Application.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/net/java/dev/wadl/_2009/_02/Grammars.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/net/java/dev/wadl/_2009/_02/Include.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/net/java/dev/wadl/_2009/_02/Method.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/net/java/dev/wadl/_2009/_02/ObjectFactory.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/net/java/dev/wadl/_2009/_02/Param.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/net/java/dev/wadl/_2009/_02/Representation.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/net/java/dev/wadl/_2009/_02/Request.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/net/java/dev/wadl/_2009/_02/Resource.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/net/java/dev/wadl/_2009/_02/ResourceType.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/net/java/dev/wadl/_2009/_02/Resources.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/net/java/dev/wadl/_2009/_02/Response.java
-/Users/ganeshmerugu/Downloads/mockingApp/application/application/src/main/java/net/java/dev/wadl/_2009/_02/package-info.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\Application.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\core\manager\FileManager.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Controller\DynamicApiController.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Controller\MockController.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Controller\StaticApiController.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\mock\registration\service\MockRegistrationService.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\core\HttpHeader.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\core\HttpHeaderBuilder.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\core\utility\IdUtility.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\EndpointDefinition.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\JsonKeyDefinition.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\mock\rest\domain\RestMockResponse.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\mock\rest\RestDefinitionType.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\MockService.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\RequestBody.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\ResponseGenerator.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\RestApplication.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\RestMethod.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\RestMockResponse.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\RestMockResponseStatus.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\RestResource.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\WADLApplication.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\WADLMethod.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\WADLResource.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Model\WADLResources.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Repository\EndpointDefinitionRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Repository\JsonKeyDefinitionRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Repository\MockResponseRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Repository\MockServiceRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Repository\RestApplicationRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Repository\RestMethodRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Repository\RestMockResponseRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Repository\RestResourceRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\converter\AbstractRestDefinitionConverter.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\converter\openapi\OpenApiRestDefinitionConverter.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\converter\raml\AbstractRAMLParser.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\converter\raml\RAML08Parser.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\converter\raml\RAML10Parser.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\converter\raml\RAMLRestDefinitionConverter.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\converter\RestDefinitionConverter.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\converter\RestDefinitionConverterFactory.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\converter\swagger\SwaggerRestDefinitionConverter.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\converter\wadl\WADLRestDefinitionConverter.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\ForwardingService.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\MockResponseService.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\MockServiceManager.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\RAMLParserUtil.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\reponseGenerationStrategy\QueryMatchResponseStrategy.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\reponseGenerationStrategy\RandomResponseStrategy.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\reponseGenerationStrategy\ResponseGenerationStrategy.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\reponseGenerationStrategy\SequenceResponseStrategy.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\RestResponseService.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\SwaggerParserUtil.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\WADLParserUtil.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\rest\Service\WSDLParserUtil.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Controller\SoapController.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Controller\StaticSoapController.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Model\SoapBinding.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Model\SoapBindingOperation.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Model\SoapDefinition.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Model\SoapElement.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Model\SoapMessage.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Model\SoapMessagePart.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Model\SoapMockResponse.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Model\SoapMockResponseStatus.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Model\SoapOperation.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Model\SoapPort.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Model\SoapPortType.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Model\SoapService.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Model\SoapType.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Repository\SoapBindingOperationRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Repository\SoapBindingRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Repository\SoapDefinitionRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Repository\SoapElementRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Repository\SoapMessagePartRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Repository\SoapMessageRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Repository\SoapMockResponseRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Repository\SoapOperationRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Repository\SoapPortRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Repository\SoapPortTypeRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Repository\SoapServiceRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Repository\SoapTypeRepository.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Service\converter\wsdl\WSDL11SoapDefinitionConverter.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Service\SoapMockResponseService.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\soap\Service\SoapMockServiceManager.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\com\mock\application\Tester.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\net\java\dev\wadl\_2009\_02\Application.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\net\java\dev\wadl\_2009\_02\Grammars.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\net\java\dev\wadl\_2009\_02\Include.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\net\java\dev\wadl\_2009\_02\Method.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\net\java\dev\wadl\_2009\_02\ObjectFactory.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\net\java\dev\wadl\_2009\_02\package-info.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\net\java\dev\wadl\_2009\_02\Param.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\net\java\dev\wadl\_2009\_02\Representation.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\net\java\dev\wadl\_2009\_02\Request.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\net\java\dev\wadl\_2009\_02\Resource.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\net\java\dev\wadl\_2009\_02\Resources.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\net\java\dev\wadl\_2009\_02\ResourceType.java
+C:\Users\GaneshMerugu\OneDrive - FICO\Desktop\ofc_mockingApp\application\application\src\main\java\net\java\dev\wadl\_2009\_02\Response.java

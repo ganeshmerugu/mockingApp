@@ -199,4 +199,10 @@ public class MockServiceManager {
     public List<RestMockResponse> getMockResponsesByStatus(RestMockResponseStatus status) {
         return mockResponseRepository.findByStatus(status);
     }
+
+    public RestMockResponse getMockResponseById(String id) {
+        return mockResponseRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No mock response found with ID: " + id));
+    }
+
 }

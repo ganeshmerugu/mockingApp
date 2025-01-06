@@ -35,7 +35,7 @@ public class SoapDefinition {
     @OneToMany(mappedBy = "soapDefinition", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SoapBinding> bindings = new ArrayList<>();
 
-    @OneToMany(mappedBy = "definition", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "soapDefinition", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SoapService> services = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
@@ -145,5 +145,56 @@ public class SoapDefinition {
 
     public SoapDefinition() {
         this.id = UUID.randomUUID().toString();  // custom generation
+    }
+
+    // Utility methods for bidirectional relationship management
+    public void addType(SoapType type) {
+        types.add(type);
+        type.setSoapDefinition(this);
+    }
+
+    public void removeType(SoapType type) {
+        types.remove(type);
+        type.setSoapDefinition(null);
+    }
+
+    public void addMessage(SoapMessage message) {
+        messages.add(message);
+        message.setSoapDefinition(this);
+    }
+
+    public void removeMessage(SoapMessage message) {
+        messages.remove(message);
+        message.setSoapDefinition(null);
+    }
+
+    public void addPortType(SoapPortType portType) {
+        portTypes.add(portType);
+        portType.setSoapDefinition(this);
+    }
+
+    public void removePortType(SoapPortType portType) {
+        portTypes.remove(portType);
+        portType.setSoapDefinition(null);
+    }
+
+    public void addBinding(SoapBinding binding) {
+        bindings.add(binding);
+        binding.setSoapDefinition(this);
+    }
+
+    public void removeBinding(SoapBinding binding) {
+        bindings.remove(binding);
+        binding.setSoapDefinition(null);
+    }
+
+    public void addService(SoapService service) {
+        services.add(service);
+        service.setSoapDefinition(this);
+    }
+
+    public void removeService(SoapService service) {
+        services.remove(service);
+        service.setSoapDefinition(null);
     }
 }

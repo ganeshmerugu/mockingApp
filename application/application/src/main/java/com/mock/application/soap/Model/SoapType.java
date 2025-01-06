@@ -14,7 +14,7 @@ public class SoapType {
     private String id;
 
     @Column(nullable = false)
-    private String name;
+    private String typeName;
 
     @Column(nullable = true, columnDefinition = "TEXT")
     private String definition;
@@ -26,11 +26,15 @@ public class SoapType {
     @OneToMany(mappedBy = "soapType", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SoapElement> elements = new ArrayList<>();
 
-    public SoapType() {}
 
-    public SoapType(String id, String name, String definition, SoapDefinition soapDefinition) {
-        this.id = id;
-        this.name = name;
+    //default constructor for JPA
+
+
+    public SoapType() {
+    }
+
+    public SoapType(String typeName, String definition, SoapDefinition soapDefinition) {
+        this.typeName = typeName;
         this.definition = definition;
         this.soapDefinition = soapDefinition;
     }
@@ -43,12 +47,12 @@ public class SoapType {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getTypeName() {
+        return typeName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 
     public String getDefinition() {
@@ -73,5 +77,18 @@ public class SoapType {
 
     public void setElements(List<SoapElement> elements) {
         this.elements = elements;
+    }
+
+
+    // Utility methods for bidirectional relationship management
+
+    public void addElement(SoapElement element) {
+        elements.add(element);
+        element.setSoapType(this);
+    }
+
+    public void removeElement(SoapElement element) {
+        elements.remove(element);
+        element.setSoapType(null);
     }
 }
