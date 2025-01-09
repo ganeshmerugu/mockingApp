@@ -5,6 +5,8 @@ import com.mock.application.rest.Service.MockResponseService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/static")
 public class StaticApiController {
+
+    private static final Logger logger = LoggerFactory.getLogger(StaticApiController.class);
 
     private final MockResponseService mockResponseService;
 
@@ -30,47 +34,73 @@ public class StaticApiController {
             HttpServletRequest request,
             @RequestBody(required = false) String requestBody) {
 
-        String path = request.getRequestURI().substring(("/static/" + projectId).length()).trim();
+        String actualPath = request.getRequestURI().substring(("/static/" + projectId).length()).trim();
         String httpMethod = request.getMethod();
 
-        try {
-            // Fetch the mock response from the database
-            Optional<RestMockResponse> responseOpt = mockResponseService.findMockResponse(projectId, path, httpMethod, requestBody);
+        logger.debug("Handling request - Project ID: {}, Actual Path: {}, HTTP Method: {}", projectId, actualPath, httpMethod);
 
-            if (responseOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Endpoint not found.\"}");
+        try {
+            if ("POST".equalsIgnoreCase(httpMethod)) {
+                logger.debug("Processing POST request...");
+                Optional<RestMockResponse> responseOpt = mockResponseService.findMockResponse(projectId, actualPath, httpMethod, requestBody);
+
+                if (responseOpt.isEmpty()) {
+                    logger.warn("No matching POST response found.");
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Endpoint not found.\"}");
+                }
+
+                RestMockResponse response = responseOpt.get();
+                return ResponseEntity.status(response.getHttpStatusCode())
+                        .headers(headers -> response.getHttpHeaders().forEach(header -> headers.add(header.getName(), header.getValue())))
+                        .body(response.getBody());
             }
 
-            RestMockResponse response = responseOpt.get();
+            logger.debug("Processing GET/PUT/DELETE request...");
+            List<RestMockResponse> responses = mockResponseService.findAllResponsesByProjectMethodAndStatus(projectId, httpMethod, 200); // Adjust status code as needed
+            Optional<RestMockResponse> responseOpt = responses.stream()
+                    .filter(response -> pathMatches(response.getPath(), actualPath))
+                    .findFirst();
 
-            // Return the matched response
-            return ResponseEntity.status(response.getHttpStatusCode())
-                    .headers(headers -> response.getHttpHeaders().forEach(header -> headers.add(header.getName(), header.getValue())))
-                    .body(requestBody != null ? requestBody : response.getBody());
+            return responseOpt
+                    .map(response -> {
+                        logger.debug("Matched response for GET/PUT/DELETE: {}", response);
+                        return ResponseEntity.status(response.getHttpStatusCode())
+                                .headers(headers -> response.getHttpHeaders().forEach(header -> headers.add(header.getName(), header.getValue())))
+                                .body(response.getBody());
+                    })
+                    .orElseGet(() -> {
+                        logger.warn("No matching response found for GET/PUT/DELETE.");
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Endpoint not found.\"}");
+                    });
 
         } catch (IllegalArgumentException e) {
-            // Return detailed error message for invalid request JSON
+            logger.error("Invalid request JSON: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\": \"" + e.getMessage() + "\"}");
         } catch (Exception e) {
-            // Handle unexpected errors
+            logger.error("Unexpected error: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Unexpected error: " + e.getMessage() + "\"}");
         }
     }
 
 
-
-
+    private boolean pathMatches(String templatePath, String actualPath) {
+        String regexPath = templatePath.replaceAll("\\{[^/]+}", "[^/]+");
+        boolean match = actualPath.matches(regexPath);
+        logger.debug("Path match result - Template Path: {}, Actual Path: {}, Match: {}", templatePath, actualPath, match);
+        return match;
+    }
 
     private boolean hasMatchingStructure(JSONObject expected, JSONObject actual) {
+        logger.debug("Comparing JSON structures...");
         for (String key : expected.keySet()) {
             if (!actual.has(key)) {
-                return false; // Missing key in the actual JSON
+                logger.debug("Missing key in actual JSON: {}", key);
+                return false;
             }
 
             Object expectedValue = expected.get(key);
             Object actualValue = actual.get(key);
 
-            // Check nested JSON objects
             if (expectedValue instanceof JSONObject && actualValue instanceof JSONObject) {
                 if (!hasMatchingStructure((JSONObject) expectedValue, (JSONObject) actualValue)) {
                     return false;
@@ -79,11 +109,9 @@ public class StaticApiController {
                 if (!hasMatchingArrayStructure((JSONArray) expectedValue, (JSONArray) actualValue)) {
                     return false;
                 }
-            } else {
-                // Check type compatibility
-                if (!isTypeCompatible(expectedValue, actualValue)) {
-                    return false;
-                }
+            } else if (!isTypeCompatible(expectedValue, actualValue)) {
+                logger.debug("Type mismatch for key: {}. Expected: {}, Actual: {}", key, expectedValue, actualValue);
+                return false;
             }
         }
         return true;
@@ -97,7 +125,6 @@ public class StaticApiController {
         Object expectedElement = expected.get(0);
         Object actualElement = actual.get(0);
 
-        // Recursively check nested objects or arrays in the array
         if (expectedElement instanceof JSONObject && actualElement instanceof JSONObject) {
             return hasMatchingStructure((JSONObject) expectedElement, (JSONObject) actualElement);
         }
@@ -106,21 +133,21 @@ public class StaticApiController {
             return hasMatchingArrayStructure((JSONArray) expectedElement, (JSONArray) actualElement);
         }
 
-        // Check primitive types
-        return isTypeCompatible(expectedElement, actualElement);
+        return true; // Primitive types comparison
     }
 
     private boolean isTypeCompatible(Object expectedValue, Object actualValue) {
-        // Check for primitive type compatibility
-        if (expectedValue instanceof String && actualValue instanceof String) return true;
-        if (expectedValue instanceof Number && actualValue instanceof Number) return true;
-        if (expectedValue instanceof Boolean && actualValue instanceof Boolean) return true;
-
-        // Allow flexibility for null or empty values
-        return (expectedValue == JSONObject.NULL || actualValue == JSONObject.NULL);
+        boolean compatible = (expectedValue instanceof String && actualValue instanceof String) ||
+                (expectedValue instanceof Number && actualValue instanceof Number) ||
+                (expectedValue instanceof Boolean && actualValue instanceof Boolean) ||
+                (expectedValue == JSONObject.NULL || actualValue == JSONObject.NULL);
+        logger.debug("Type compatibility check - Expected: {}, Actual: {}, Compatible: {}", expectedValue, actualValue, compatible);
+        return compatible;
     }
+
     @GetMapping("/list-mocked-urls")
     public ResponseEntity<?> listMockedUrls() {
+        logger.debug("Listing all mocked URLs...");
         return ResponseEntity.ok(mockResponseService.listAllEndpoints());
     }
 }

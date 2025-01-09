@@ -15,4 +15,12 @@ public interface RestMockResponseRepository extends JpaRepository<RestMockRespon
     List<RestMockResponse> findByProjectIdAndApplicationIdAndResourceId(String projectId, String applicationId, String resourceId);
 
     List<RestMockResponse> findAllByProjectIdAndPathAndHttpMethod(String projectId, String path, String httpMethod);
+
+    Optional<RestMockResponse> findByProjectIdAndPathAndHttpMethodAndHttpStatusCode(String projectId, String path, String httpMethod, int httpStatusCode);
+
+    List<RestMockResponse> findByProjectIdAndHttpMethod(String projectId, String httpMethod);
+    List<RestMockResponse> findAllByProjectIdAndHttpMethodAndHttpStatusCode(String projectId, String httpMethod, int httpStatusCode);
+
+
+    Optional<RestMockResponse> findByProjectIdAndPathAndHttpStatusCode(String projectId, String path, Integer httpStatusCode);
 }

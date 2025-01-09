@@ -152,4 +152,19 @@ public class MockResponseService {
     public String generateCompleteJsonResponse(RestMockResponse mockResponse) {
         return mockResponse.getBody() != null && !mockResponse.getBody().isEmpty() ? mockResponse.getBody() : "{\"message\": \"No example data available\"}";
     }
+
+    public Optional<RestMockResponse> findMockResponseByStatus(String projectId, String path, String httpMethod, int httpStatusCode) {
+        return restMockResponseRepository.findByProjectIdAndPathAndHttpMethodAndHttpStatusCode(projectId, path, httpMethod, httpStatusCode);
+    }
+
+
+    public Optional<RestMockResponse> findByProjectIdPathMethodAndStatus(String projectId, String actualPath, String httpMethod, int httpStatusCode) {
+        return restMockResponseRepository.findByProjectIdAndPathAndHttpStatusCode(projectId, httpMethod,httpStatusCode);
+
+    }
+    public List<RestMockResponse> findAllResponsesByProjectMethodAndStatus(String projectId, String httpMethod, int httpStatusCode) {
+        return restMockResponseRepository.findAllByProjectIdAndHttpMethodAndHttpStatusCode(projectId, httpMethod, httpStatusCode);
+    }
+
+
 }
