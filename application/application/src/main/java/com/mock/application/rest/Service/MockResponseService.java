@@ -166,5 +166,12 @@ public class MockResponseService {
         return restMockResponseRepository.findAllByProjectIdAndHttpMethodAndHttpStatusCode(projectId, httpMethod, httpStatusCode);
     }
 
+    public List<RestMockResponse> findResponsesByProjectMethodAndStatus(String projectId, String httpMethod, int httpStatusCode) {
+        return restMockResponseRepository.findAllByProjectIdAndHttpMethodAndHttpStatusCode(projectId, httpMethod, httpStatusCode);
+    }
 
+
+    public List<RestMockResponse> findAllResponsesByProjectAndMethod(String projectId, String httpMethod) {
+        return restMockResponseRepository.findAllByProjectIdAndHttpMethod(projectId, httpMethod);
+    }
 }

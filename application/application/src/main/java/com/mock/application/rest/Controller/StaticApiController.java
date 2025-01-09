@@ -40,38 +40,52 @@ public class StaticApiController {
         logger.debug("Handling request - Project ID: {}, Actual Path: {}, HTTP Method: {}", projectId, actualPath, httpMethod);
 
         try {
-            if ("POST".equalsIgnoreCase(httpMethod)) {
-                logger.debug("Processing POST request...");
-                Optional<RestMockResponse> responseOpt = mockResponseService.findMockResponse(projectId, actualPath, httpMethod, requestBody);
+            Optional<RestMockResponse> responseOpt;
+
+            if ("POST".equalsIgnoreCase(httpMethod) || "PUT".equalsIgnoreCase(httpMethod)) {
+                logger.debug("Processing {} request...", httpMethod);
+                responseOpt = mockResponseService.findMockResponse(projectId, actualPath, httpMethod, requestBody);
 
                 if (responseOpt.isEmpty()) {
-                    logger.warn("No matching POST response found.");
+                    logger.warn("No matching response found for {} request.", httpMethod);
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Endpoint not found.\"}");
                 }
 
                 RestMockResponse response = responseOpt.get();
-                return ResponseEntity.status(response.getHttpStatusCode())
-                        .headers(headers -> response.getHttpHeaders().forEach(header -> headers.add(header.getName(), header.getValue())))
-                        .body(response.getBody());
+
+                // Dynamically check if body validation is needed (for POST and PUT only)
+                if (requestBody != null && !requestBody.isEmpty()) {
+                    JSONObject expectedBody = new JSONObject(response.getBody());
+                    JSONObject actualBody = new JSONObject(requestBody);
+
+                    if (!hasMatchingStructure(expectedBody, actualBody)) {
+                        logger.warn("Request body does not match the expected structure.");
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\": \"Request body does not match expected structure.\"}");
+                    }
+                }
+
+                return buildResponse(response);
+
+            } else if ("GET".equalsIgnoreCase(httpMethod) || "DELETE".equalsIgnoreCase(httpMethod)) {
+                logger.debug("Processing {} request...", httpMethod);
+                List<RestMockResponse> responses = mockResponseService.findAllResponsesByProjectAndMethod(projectId, httpMethod);
+
+                responseOpt = responses.stream()
+                        .filter(response -> pathMatches(response.getPath(), actualPath))
+                        .findFirst();
+
+                if (responseOpt.isEmpty()) {
+                    logger.warn("No matching response found for {} request.", httpMethod);
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Endpoint not found.\"}");
+                }
+
+                RestMockResponse response = responseOpt.get();
+                return buildResponse(response);
+
+            } else {
+                logger.warn("Unsupported HTTP method: {}", httpMethod);
+                return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body("{\"error\": \"Method not supported.\"}");
             }
-
-            logger.debug("Processing GET/PUT/DELETE request...");
-            List<RestMockResponse> responses = mockResponseService.findAllResponsesByProjectMethodAndStatus(projectId, httpMethod, 200); // Adjust status code as needed
-            Optional<RestMockResponse> responseOpt = responses.stream()
-                    .filter(response -> pathMatches(response.getPath(), actualPath))
-                    .findFirst();
-
-            return responseOpt
-                    .map(response -> {
-                        logger.debug("Matched response for GET/PUT/DELETE: {}", response);
-                        return ResponseEntity.status(response.getHttpStatusCode())
-                                .headers(headers -> response.getHttpHeaders().forEach(header -> headers.add(header.getName(), header.getValue())))
-                                .body(response.getBody());
-                    })
-                    .orElseGet(() -> {
-                        logger.warn("No matching response found for GET/PUT/DELETE.");
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Endpoint not found.\"}");
-                    });
 
         } catch (IllegalArgumentException e) {
             logger.error("Invalid request JSON: {}", e.getMessage(), e);
@@ -82,6 +96,11 @@ public class StaticApiController {
         }
     }
 
+    private ResponseEntity<?> buildResponse(RestMockResponse response) {
+        return ResponseEntity.status(response.getHttpStatusCode())
+                .headers(headers -> response.getHttpHeaders().forEach(header -> headers.add(header.getName(), header.getValue())))
+                .body(response.getBody());
+    }
 
     private boolean pathMatches(String templatePath, String actualPath) {
         String regexPath = templatePath.replaceAll("\\{[^/]+}", "[^/]+");
