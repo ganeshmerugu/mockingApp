@@ -47,13 +47,28 @@ public class SoapMockResponseService {
     /**
      * Finds a SoapMockResponse by response name and SOAP action.
      *
-     * @param responseName The name of the response.
      * @param soapAction   The SOAP action.
      * @return An Optional containing the found SoapMockResponse, or empty if not found.
      */
-    public Optional<SoapMockResponse> findMockResponse(String responseName, String soapAction) {
-        logger.debug("Finding SoapMockResponse by responseName='{}' and soapAction='{}'.", responseName, soapAction);
-        return responseRepository.findByResponseNameAndSoapAction(responseName, soapAction);
+    public Optional<SoapMockResponse> findMockResponse(String operationName, String soapAction, String projectId) {
+        logger.debug("Finding SoapMockResponse by operationName='{}', soapAction='{}', projectId='{}'.",
+                operationName, soapAction, projectId);
+
+        List<SoapMockResponse> responses = responseRepository.findAllBySoapActionAndOperationNameAndProjectId(
+                soapAction, operationName, projectId);
+
+        if (responses.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // Prioritize non-fault responses (HTTP 200) over fault responses
+        SoapMockResponse selectedResponse = responses.stream()
+                .filter(r -> !r.isFault())  // Prefer success responses
+                .findFirst()
+                .orElse(responses.get(0)); // Fallback to the first response
+
+        logger.debug("Selected SoapMockResponse: {}", selectedResponse.getResponseName());
+        return Optional.of(selectedResponse);
     }
 
     /**

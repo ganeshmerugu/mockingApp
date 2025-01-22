@@ -1,14 +1,15 @@
 package com.mock.application.soap.Controller;
 
-import com.mock.application.rest.Service.converter.openapi.OpenApiRestDefinitionConverter;
 import com.mock.application.soap.Model.SoapMockResponse;
 import com.mock.application.soap.Service.SoapMockResponseService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -16,41 +17,34 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/mock/soap/static")
+@RequestMapping("/static")
 public class StaticSoapController {
 
     private static final Logger logger = LoggerFactory.getLogger(StaticSoapController.class);
 
-
     private final SoapMockResponseService mockResponseService;
-
 
     @Autowired
     public StaticSoapController(SoapMockResponseService mockResponseService) {
         this.mockResponseService = mockResponseService;
     }
 
-    @PostMapping("/handle")
-    public ResponseEntity<String> handleSoapRequest(@RequestBody String soapRequest, @RequestHeader Map<String, String> headers) {
+    @RequestMapping(value = "/handle/{projectId}/**", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+    public ResponseEntity<?> handleStaticRequest(
+            @PathVariable String projectId,
+            HttpServletRequest request,
+            @RequestBody(required = false) String requestBody) {
         try {
-            String operationName = extractOperationName(soapRequest);
-            logger.info("SOAP Operation: {}", operationName);
-
-            String soapAction = headers.getOrDefault("SOAPAction", "").replace("\"", "");
+            String soapAction = request.getHeader("SOAPAction");
             logger.info("SOAP Action: {}", soapAction);
 
-            Optional<SoapMockResponse> mockResponseOpt;
+            String operationName = extractOperationName(requestBody);
+            logger.info("SOAP Operation: {}", operationName);
 
-            // Query with both operationName and soapAction if present
-            if (!soapAction.isEmpty()) {
-                mockResponseOpt = mockResponseService.findMockResponse(operationName, soapAction);
-            } else {
-                mockResponseOpt = mockResponseService.findMockResponseByOperation(operationName);
-            }
+            Optional<SoapMockResponse> mockResponseOpt = mockResponseService.findMockResponse(operationName, soapAction, projectId);
 
             if (mockResponseOpt.isEmpty()) {
                 logger.warn("Mock response not found for Operation: {} and Action: {}", operationName, soapAction);
@@ -67,19 +61,18 @@ public class StaticSoapController {
         }
     }
 
-
     @GetMapping("/responses")
     public ResponseEntity<List<SoapMockResponse>> getAllMockResponses(@RequestParam String projectId) {
         List<SoapMockResponse> responses = mockResponseService.findAllByProjectId(projectId);
         return responses.isEmpty()
-                ? ResponseEntity.notFound().build()
+                ? ResponseEntity.status(HttpStatus.NOT_FOUND).build()
                 : ResponseEntity.ok(responses);
     }
 
     @PostMapping("/responses")
     public ResponseEntity<SoapMockResponse> createMockResponse(@RequestBody SoapMockResponse mockResponse) {
         if (mockResponse == null || mockResponse.getResponseName() == null || mockResponse.getResponseName().isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(null);
         }
         SoapMockResponse savedResponse = mockResponseService.saveMockResponse(mockResponse);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedResponse);
@@ -88,21 +81,24 @@ public class StaticSoapController {
     @PutMapping("/responses/{id}")
     public ResponseEntity<SoapMockResponse> updateMockResponse(@PathVariable String id, @RequestBody SoapMockResponse updatedResponse) {
         if (updatedResponse == null || updatedResponse.getResponseName() == null || updatedResponse.getResponseName().isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(null);
         }
         return mockResponseService.updateMockResponse(id, updatedResponse)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @DeleteMapping("/responses/{id}")
     public ResponseEntity<Void> deleteMockResponse(@PathVariable String id) {
         boolean deleted = mockResponseService.deleteMockResponse(id);
-        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     private String extractOperationName(String soapRequest) {
         try {
+            if (soapRequest == null || soapRequest.isEmpty()) {
+                return null;
+            }
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -128,6 +124,4 @@ public class StaticSoapController {
         }
         return null;
     }
-
-
 }

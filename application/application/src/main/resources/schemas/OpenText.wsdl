@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" name="OpenText" targetNamespace="http://www.woolworths.co.za/ait/wfs/services/sireco/OpenText" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.woolworths.co.za/ait/wfs/services/sireco/OpenText" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <wsdl:documentation>
+    <wsdl:appinfo source="WMQI_APPINFO">
+      <MRWSDLAppInfo imported="true">
+        <binding hasEncoding="false" imported="true" name="OpenTextSOAP" originalBindingStyle="document"/>
+      </MRWSDLAppInfo>
+    </wsdl:appinfo>
+  </wsdl:documentation>
+  
+	<wsdl:types>
+		<xsd:schema targetNamespace="http://www.woolworths.co.za/ait/wfs/services/sireco/OpenText">
+<xsd:include schemaLocation="OpenText_InlineSchema1.xsd"/>
+</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="SearchCustomerRecordUsingCredentialsRequest">
+		<wsdl:part element="tns:SearchCustomerRecordUsingCredentials" name="parameters"/>
+	</wsdl:message>
+	<wsdl:message name="SearchCustomerRecordUsingCredentialsResponse">
+		<wsdl:part element="tns:SearchCustomerRecordUsingCredentialsResponse" name="parameters"/>
+	</wsdl:message>
+	<wsdl:message name="CreatDocumentUsingCredentialsRequest">
+		<wsdl:part element="tns:CreatDocumentUsingCredentials" name="parameters"/>
+	</wsdl:message>
+	<wsdl:message name="CreatDocumentUsingCredentialsResponse">
+		<wsdl:part element="tns:CreatDocumentUsingCredentialsResponse" name="parameters"/>
+	</wsdl:message>
+	<wsdl:message name="SearchCustomerRecordUsingCredentials_faultMsg">
+		<wsdl:part element="tns:GenericFault" name="parameters"/>
+	</wsdl:message>
+	<wsdl:message name="CreatDocumentUsingCredentials_faultMsg">
+		<wsdl:part element="tns:GenericFault" name="parameters"/>
+	</wsdl:message>
+	<wsdl:portType name="OpenTextIf">
+		<wsdl:operation name="SearchCustomerRecordUsingCredentials">
+			<wsdl:input message="tns:SearchCustomerRecordUsingCredentialsRequest"/>
+			<wsdl:output message="tns:SearchCustomerRecordUsingCredentialsResponse"/>
+			<wsdl:fault message="tns:SearchCustomerRecordUsingCredentials_faultMsg" name="fault"/>
+		</wsdl:operation>
+		<wsdl:operation name="CreatDocumentUsingCredentials">
+			<wsdl:input message="tns:CreatDocumentUsingCredentialsRequest"/>
+			<wsdl:output message="tns:CreatDocumentUsingCredentialsResponse"/>
+			<wsdl:fault message="tns:CreatDocumentUsingCredentials_faultMsg" name="fault"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="OpenTextSOAP" type="tns:OpenTextIf">
+
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="SearchCustomerRecordUsingCredentials">
+
+			<soap:operation soapAction="http://www.woolworths.co.za/ait/wfs/services/sireco/OpenText/SearchCustomerRecordUsingCredentials"/>
+			<wsdl:input>
+
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="fault">
+
+				<soap:fault name="fault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="CreatDocumentUsingCredentials">
+
+			<soap:operation soapAction="http://www.woolworths.co.za/ait/wfs/services/sireco/OpenText/CreatDocumentUsingCredentials"/>
+			<wsdl:input>
+
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="fault">
+
+				<soap:fault name="fault" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="OpenText">
+		<wsdl:port binding="tns:OpenTextSOAP" name="OpenTextSOAP">
+			<soap:address location="http://ait-brokerdev:7801/AIT/WFS/Services/SiReCo/OpenText"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

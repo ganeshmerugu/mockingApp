@@ -53,7 +53,7 @@ public class StaticApiController {
 
                 RestMockResponse response = responseOpt.get();
 
-                // Dynamically check if body validation is needed (for POST and PUT only)
+                // Validate the request body structure
                 if (requestBody != null && !requestBody.isEmpty()) {
                     JSONObject expectedBody = new JSONObject(response.getBody());
                     JSONObject actualBody = new JSONObject(requestBody);
@@ -64,7 +64,8 @@ public class StaticApiController {
                     }
                 }
 
-                return buildResponse(response);
+                // Return the response body from the database
+                return buildResponse(response, null);
 
             } else if ("GET".equalsIgnoreCase(httpMethod) || "DELETE".equalsIgnoreCase(httpMethod)) {
                 logger.debug("Processing {} request...", httpMethod);
@@ -80,7 +81,10 @@ public class StaticApiController {
                 }
 
                 RestMockResponse response = responseOpt.get();
-                return buildResponse(response);
+                logger.debug("Matched response found with status: {}", response.getHttpStatusCode());
+
+                // Return the response body from the database for GET and DELETE methods
+                return buildResponse(response, null);
 
             } else {
                 logger.warn("Unsupported HTTP method: {}", httpMethod);
@@ -96,16 +100,21 @@ public class StaticApiController {
         }
     }
 
-    private ResponseEntity<?> buildResponse(RestMockResponse response) {
+
+    private ResponseEntity<?> buildResponse(RestMockResponse response, String requestBody) {
+        String responseBody = requestBody != null ? requestBody : response.getBody();
         return ResponseEntity.status(response.getHttpStatusCode())
                 .headers(headers -> response.getHttpHeaders().forEach(header -> headers.add(header.getName(), header.getValue())))
-                .body(response.getBody());
+                .body(responseBody);
     }
 
     private boolean pathMatches(String templatePath, String actualPath) {
         String regexPath = templatePath.replaceAll("\\{[^/]+}", "[^/]+");
         boolean match = actualPath.matches(regexPath);
-        logger.debug("Path match result - Template Path: {}, Actual Path: {}, Match: {}", templatePath, actualPath, match);
+
+        int statusCode = match ? 200 : 404; // Use 200 for match, 404 for no match
+        logger.debug("Path match result - Template Path: {}, Actual Path: {}, Match: {}, Status Code: {}", templatePath, actualPath, match, statusCode);
+
         return match;
     }
 
